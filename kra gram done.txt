@@ -1,0 +1,113 @@
+
+		-Program ::= { MOCall } ClassDec { ClassDec }
+
+		-MOCall ::= “@” Id [ “(” { MOParam } “)” ]
+
+		-MOParam ::= IntValue | StringValue | Id
+
+
+		-ClassDec ::= “class” Id [ “extends” Id ] “{” MemberList “}”
+
+		-MemberList ::= { Qualifier Member }
+	-Qualifier ::= [ “final” ] [ “static” ] ( “private” | “public”)
+		-Member ::= InstVarDec | MethodDec
+
+	-InstVarDec ::= Type IdList “;”
+-IdList ::= Id { “,” Id }
+
+	-MethodDec ::= Type Id “(” [ FormalParamDec ] “)” “{” StatementList “}”
+
+	-FormalParamDec ::= ParamDec { “,” ParamDec }
+	-ParamDec ::= Type Id
+
+	-StatementList ::= { Statement }
+
+
+	-LocalDec ::= Type IdList “;”
+//-IdList ::= Id { “,” Id }
+	-Id ::= Letter { Letter | Digit | “ ” }
+
+
+	-Type ::= BasicType | Id
+		-BasicType ::= “void” | “int” | “boolean” | “String”
+//-Id ::= Letter { Letter | Digit | “ ” } // SEMÂNTICA DE TIPO DE CLASSE DECLARADA
+
+
+
+	-Statement ::= AssignExprLocalDec “;” | IfStat | WhileStat | ReturnStat “;” |
+					ReadStat “;” | WriteStat “;” | “break” “;” | “;” | CompStatement
+
+	-AssignExprLocalDec ::= Expression [ “=” Expression ] | LocalDec
+	-IfStat ::= “if” “(” Expression “)” Statement [ “else” Statement ]
+	-WhileStat ::= “while” “(” Expression “)” Statement
+	-ReturnStat ::= “return” Expression
+	-ReadStat ::= “read” “(” LeftValue { “,” LeftValue } “)”
+	-WriteStat ::= “write” “(” ExpressionList “)”
+	//-writeln
+	-CompStatement ::= “{” { Statement } “}”
+
+
+
+		-ExpressionList ::= Expression { “,” Expression }
+		-Expression ::= SimpleExpression [ Relation SimpleExpression ]
+
+	-SimpleExpression ::= Term { LowOperator Term }
+	-Term ::= SignalFactor { HighOperator SignalFactor }
+	-SignalFactor ::= [ Signal ] Factor
+
+
+-Factor ::= BasicValue |
+			“(” Expression “)” |
+			“!” Factor |
+			“null” |
+			ObjectCreation |
+			PrimaryExpr
+
+
+	-BasicValue ::= IntValue | BooleanValue | StringValue
+	-IntValue ::= Digit { Digit }
+	-BooleanValue ::= “true” | “false”
+	-//StringValue
+
+-ObjectCreation ::= “new” Id “(” “)”
+
+-PrimaryExpr ::= “super” “.” Id “(” [ ExpressionList ] “)” |
+				Id |
+				Id “.” Id |
+				Id “.” Id “(” [ ExpressionList ] ”)” |
+				Id “.” Id “.” Id “(” [ ExpressionList ] “)” |
+				“this” |
+				“this” “.” Id |
+				“this” ”.” Id “(” [ ExpressionList ] “)” |
+				“this” ”.” Id “.” Id “(” [ ExpressionList ] “)”
+
+
+
+
+-RightValue ::= “this” [ “.” Id ] | Id [ “.” Id ]
+-LeftValue ::= [ (“this” | Id ) “.” ] Id
+
+-Relation ::= “==” | “<” | “>” | “<=” | “>=” | “! =”
+-HighOperator ::= “∗” | “/” | “&&”
+-LowOperator ::= “+” | “−” | “||”
+-Signal ::= “+” | “−”
+
+-Letter ::= “A” | ... | “Z” | “a” | ... | “z”
+-Digit ::= “0” | ... | “9”
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

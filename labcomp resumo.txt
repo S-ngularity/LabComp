@@ -1,0 +1,148 @@
+Krakatoa
+
+Program com método public void run() é o main
+
+
+class Name {
+	private & public members
+}
+
+classes:
+	nome diferente de todos os anteriores
+	variáveis privadas
+	métodos privados ou públicos
+
+
+public ReturnType methodName( parameter-list ) {
+Statement-List
+}
+
+métodos:
+	diferente de todos os membros anteriores da classe
+	retorno de uma Classe, type (String, int, boolean) ou void
+
+
+static private Type variableName;
+
+variável estática:
+	declarada dentro de uma classe como static private
+	acessada apenas como ClassName.variableName
+	pode ter o mesmo nome de uma variável de instância
+
+
+static public ReturnType methodName( parameter-list ) {
+Statement-List
+}
+
+método estático:
+	podem ser public ou private
+	não pode ter nome igual a outro método estático da mesma classe, mas pode ter nome igual a um não-estático
+	chamado por ClassName.MethodName() mesmo dentro da própria classe.
+	um método estático só pode chamar outro declarado anteriormente
+	'this' não pode ser usado dentro de um método estático (então não pode chamar métodos não-estáticos ou variáveis de sua classe, se não forem parâmetros ou variáveis locais)
+	'super' não pode ser usado dentro de um método estático
+	métodos estáticos das classes são independentes da hierarquia de herança, podem ter o mesmo nome de um estático de uma superclasse/subclasse
+	métodos não-estáticos podem chamar métodos estáticos
+	um método privado estático pode ser chamado por qualquer outro método estático ou não-estático da classe
+
+
+Store s, t;
+s = new Store();
+t = s;
+
+declaração:
+	variáveis e parâmetros cujos tipos são classes são ponteiros
+	Class String is much like a class. However, it is not possible to create a String object with new.
+	existe um valor global null que pode ser associado à qualquer variável do tipo classe. null representa o valor de uma classe sem métodos.
+
+
+class B extends A {
+...
+}
+
+herança:
+	classe B herda todos os métodos e variáveis de instância de A.
+	um método público de A pode ser redefinido em B se sua assinatura não mudar (nome, tipo de retorno, tipos de parâmetros). o método redefinido deve também ser público
+	B pode redefinir um método privado de A, já que ninguém sabe quais são os métodos de A. É como se um método novo fosse definido.
+	B não tem acesso a métodos/variáveis privadas de A.
+
+	super.m(p1, p2, ... pn) num método de B faz o compilador buscar por m começando na superclasse de B e continuando acima até achar (ou não). os parâmetros devem ser conversíveis aos do método achado
+
+
+final class Earth {
+..
+}
+
+final class é usado para uma classe que não pode ser herdada. "All message sends to its methods can be static. That is, there is no need of a search for a method at runtime." (???)
+
+
+final public void get() { ... }
+
+	um método final não pode ser redefinido numa subclasse.
+	só métodos públicos podem ser finais.
+	classes finais não podem declarar métodos finais pois todos os métodos já são finais.
+
+
+s.calc(b)
+
+envio de mensagens:
+	s.calc(b) é um envio da mensagem calc(b) para o objeto apontado por s.
+	é válido se a classe de s ou uma de suas superclasses tem um método público calc, e ele toma o número certo de parâmetros que podem ser convertidos dos tipos passados.
+
+	um método que não tem valor de retorno é usado como statement. stack.print();
+	um método que retorna algo tem que ser usado numa expressão. if(stack.getSize() > 0) insert(0);
+
+	"At runtime, the runtime system (RTS) makes a search for a method calc in the class of the object referred by s. If it is not found there, the search continues in the superclass of the class of this object, the superclass of the superclass, and so on. When a method is found, it is called. The RTS will always found a adequate method except when the variable points to null."
+
+
+this
+	o 'this' representa uma variável cujo tipo é a classe dentro de que está sendo usado.
+	'this' aponta para o objeto que recebeu a mensagem que causou a execução do método.
+	não pode ser mudado por um assignment
+
+	"In a message send this.m() inside a class A, the compiler searches for a private method m. If none is found, the search continues in the public methods of A. If none is found, the search continues in the public methods of the superclass of A, the superclass of the superclass, and so on."
+
+
+
+
+
+krakatoa elements:
+
+	comentários:
+		não podem haver /* */ aninhados. /* */ após // são ignorados. // dentro de /* */ são ignorados.
+
+	tipos e literais básicos:
+		int, boolean, String
+
+		int literals podem ser de 0 a 32767. qualquer número de zeros à esquerda é válido.
+		
+		boolean são true ou false.
+		
+		String literals têm que aparecer entre "". The backslash \ can be used to remove the meaning of " and the backslash itself. In fact, the string "\c" has the same meaning as in C regardless of the character c, which can be anything.
+
+		os operadores de comparação <, <=, >, >= só podem ser aplicados à valores int.
+		== e != podem ser aplicados a valores int e boolean.
+		== e != também podem ser aplicados para comparar expressões cujos tipos são classes, resultando num boolean. (compara se os ponteiros apontam pro mesmo lugar?) se LeftType e RightType forem o mesmo tipo ou um for conversível ao outros, é uma expressão legal. se não, é ilegal.
+
+		"Operators == and != can also be used when LeftType (RightType) is String. In this case, RightType (LeftType) must be String or right (left) must be null."
+
+		+, -, *, / são aplicados a valores int e retornam int.
+		&&, || e ! aceitam valores boolean.
+
+	escopo:
+		o escopo do nome de uma classe é do lugar em que foi declarada até o fim do arquivo.
+		o escopo de uma variável de instância ou método é do lugar em que foi declarado até o fim da classe.
+			porém, variáveis de instância e métodos do objeto que recebeu a mensagens precisam ser utilizados através do 'this'. portanto, set(0) é sempre ilegal pois não há objeto para receber a mensagem.
+		o escopo de variáveis locais e parâmetros de um método é do lugar de declaração até o fim do corpo do método.
+			uma variável local não pode ter o mesmo nome de um parâmetro do mesmo método.
+			variáveis locais e variáveis de instância são sempre distinguidas pois as de instância são acessadas através do 'this'.
+			variáveis locais têm precedência sobre nomes de classes, que são globais.
+
+	assignment:
+		um assignment left = rightExpr é válido se, assumindo LeftType sendo o tipo de left e RightType sendo o tipo de rightExpr:
+			LeftType é int, boolean ou String e LeftType é RightType
+			RightType é uma subclasse de LeftType. uma classe é subclasse de si mesma.
+			LeftType é uma classe e RightType é null.
+
+		se qualquer destes itens é válido, RightType é conversível a LeftType.
+		as mesmas regras se aplicam para a passagem de parâmetros a métodos e valores de retorno pelo 'return'.
