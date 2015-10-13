@@ -114,9 +114,9 @@ public class Lexer {
 							ident.append(input[tempTokenPos]);
 							tempTokenPos++;
 					}
-					stringValue = ident.toString();
+					String tempStringValue = ident.toString();
 						// if identStr is in the list of keywords, it is a keyword !
-					Symbol value = keywordsTable.get(stringValue);
+					Symbol value = keywordsTable.get(tempStringValue);
 
 					if ( value == null )
 						return true;

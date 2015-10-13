@@ -14,6 +14,8 @@ public class Method {
 		
 		parameterList = new ParamList();
 		
+		stmtList = new StatementList();
+		
 		isFinal = isMethodFinal;
 		isStatic = isMethodStatic;
     }
@@ -27,6 +29,11 @@ public class Method {
 	public void addParameter(Variable v)
 	{
 		parameterList.addElement(v);
+	}
+	
+	public void addStatement(Statement s)
+	{
+		stmtList.addElement(s);
 	}
 	
 	public boolean isFinal()
@@ -75,6 +82,8 @@ public class Method {
     private Type type;
 	
 	private ParamList parameterList;
+	
+	private StatementList stmtList;
 	
 	private boolean isFinal;
 	private boolean isStatic;

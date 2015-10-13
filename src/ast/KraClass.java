@@ -20,6 +20,8 @@ public class KraClass extends Type {
 		privateMethodList = new MethodList();
 		publicStaticMethodList = new MethodList();
 		privateStaticMethodList = new MethodList();
+		
+		orderedMemberList = new OrderedClassMemberList();
    }
    
    public String getCname() {
@@ -73,21 +75,25 @@ public class KraClass extends Type {
    public void addStaticPublicMethod(Method m)
    {
 	   publicStaticMethodList.addElement(m);
+	   orderedMemberList.addElement(m);
    }
    
    public void addStaticPrivateMethod(Method m)
    {
 	   privateStaticMethodList.addElement(m);
+	   orderedMemberList.addElement(m);
    }
    
    public void addPublicMethod(Method m)
    {
 	   publicMethodList.addElement(m);
+	   orderedMemberList.addElement(m);
    }
    
    public void addPrivateMethod(Method m)
    {
 	   privateMethodList.addElement(m);
+	   orderedMemberList.addElement(m);
    }
    
    
@@ -95,20 +101,22 @@ public class KraClass extends Type {
    {
 	   return instanceVariableStaticList.getInstanceVar(name);
    }
-   
-   public void addStaticInstanceVar(InstanceVariable instVar)
-   {
-	   instanceVariableStaticList.addElement(instVar);
-   }
-   
+      
    public InstanceVariable searchInstVar(String name)
    {
 	   return instanceVariableList.getInstanceVar(name);
    }
    
+   public void addStaticInstanceVar(InstanceVariable instVar)
+   {
+	   instanceVariableStaticList.addElement(instVar);
+	   orderedMemberList.addElement(instVar);
+   }
+   
    public void addInstanceVar(InstanceVariable instVar)
    {
 	   instanceVariableList.addElement(instVar);
+	   orderedMemberList.addElement(instVar);
    }
    
    private String name;
@@ -116,6 +124,8 @@ public class KraClass extends Type {
    private KraClass superclass;
    private InstanceVariableList instanceVariableList, instanceVariableStaticList;
    private MethodList publicMethodList, privateMethodList, publicStaticMethodList, privateStaticMethodList;
+   
+   private OrderedClassMemberList orderedMemberList;
   
    // m�todos p�blicos get e set para obter e iniciar as vari�veis acima,
    // entre outros m�todos
