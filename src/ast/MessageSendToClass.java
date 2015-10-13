@@ -4,12 +4,12 @@
 */
 package ast;
 
-public class MessageSendToSuper extends MessageSend { 
+public class MessageSendToClass extends MessageSend { 
 	
-	public MessageSendToSuper(KraClass actualSuperclass, Method message, ExprList args)
+	public MessageSendToClass(KraClass targetClass, Method message, ExprList args)
 	{
 		super(message, args);
-		superclass = actualSuperclass;
+		tClass = targetClass;
 	}
 
     public Type getType() { 
@@ -20,5 +20,5 @@ public class MessageSendToSuper extends MessageSend {
         
     }
     
-	KraClass superclass;
+	KraClass tClass;
 }

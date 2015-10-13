@@ -63,13 +63,38 @@ public class KraClass extends Type {
 	   return privateMethodList.getMethod(methodName);
    }
    
-   public Method searchSuperclassMethod(String methodName)
+   public Method searchSuperclassMethod(String methodName, KraClass foundSuperclass)
    {
 	   if(superclass == null)
+	   {
+		   foundSuperclass = null;
 		   return null;
+	   }
 	   
 	   else
-		   return superclass.searchPublicMethod(methodName);
+	   {
+		   return superclass.searchThisSuperclassMethod(methodName, foundSuperclass);
+	   }
+   }
+   
+   private Method searchThisSuperclassMethod(String methodName, KraClass foundSuperclass)
+   {
+	   Method m = searchPublicMethod(methodName);
+	   
+	   if(m != null)
+	   {
+		   foundSuperclass = this;
+		   return m;
+	   }
+	   
+	   else if(superclass == null)
+	   {
+		   foundSuperclass = null;
+		   return null;
+	   }
+	   
+	   else
+		   return superclass.searchThisSuperclassMethod(methodName, foundSuperclass);
    }
    
    public void addStaticPublicMethod(Method m)

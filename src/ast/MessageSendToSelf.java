@@ -6,13 +6,19 @@ package ast;
 
 
 public class MessageSendToSelf extends MessageSend {
+	
+	public MessageSendToSelf(KraClass myself, Method message, ExprList args)
+	{
+		super(message, args);
+		self = myself;
+	}
     
     public Type getType() { 
-        return null;
+         return super.m.getType();
     }
     
     public void genKra( PW pw, boolean putParenthesis ) {
     }
     
-    
+    KraClass self;
 }
