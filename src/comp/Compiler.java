@@ -373,7 +373,7 @@ public class Compiler {
 		lexer.nextToken();
 		
 		// checa se redefine método final (não-estático)
-		Method m = currentClass.searchSuperclassMethod(name);
+		Method m = currentClass.searchSuperclassMethod(name, null);
 		if(m != null && !currentMethod.isStatic() && currentMethod.hasSameSignature(m) && m.isFinal())
 			signalError.show("Method '"+name+"' is overriding a final method.");
 		
@@ -1001,7 +1001,7 @@ public class Compiler {
 
 		Expr e;
 		ExprList exprList;
-		String messageName, ident;
+		String messageName, secondId;
 
 		switch (lexer.token) {
 		// IntValue
@@ -1039,13 +1039,19 @@ public class Compiler {
 			
 		// "!" Factor
 		case NOT:
-			lexer.nextToken();
+			lexer.nextToken(); // pula !
+			
 			e = expr();
+			
+			//if(e.getType() != Type.booleanType)
+			//	signalError.show("Operator '!' does not accepts '"+e.getType().getName()+"' values.");
+				
 			return new UnaryExpr(e, Symbol.NOT);
 			
 		// ObjectCreation ::= "new" Id "(" ")"
 		case NEW:
-			lexer.nextToken();
+			lexer.nextToken(); // pula new
+			
 			if ( lexer.token != Symbol.IDENT )
 				signalError.show("Identifier expected");
 
@@ -1055,18 +1061,20 @@ public class Compiler {
 			 *      aClass = symbolTable.getInGlobal(className); 
 			 *      if ( aClass == null ) ...
 			 */
+			
+			KraClass createdClass = symbolTable.getInGlobal(className);
+			if(createdClass == null)
+				signalError.show("'"+className+"' is not a declared class.");
 
-			lexer.nextToken();
+			lexer.nextToken(); // pula IDENT
 			
 			if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
 			lexer.nextToken();
 			
 			if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
 			lexer.nextToken();
-			/*
-			 * return an object representing the creation of an object
-			 */
-			return null;
+			
+			return new NewExpr(createdClass);
 		
 		/*
 		 * PrimaryExpr ::= "super" "." Id "(" [ ExpressionList ] ")"  | 
@@ -1092,70 +1100,198 @@ public class Compiler {
 			if ( lexer.token != Symbol.IDENT )
 				signalError.show("Identifier expected");
 			messageName = lexer.getStringValue();
-			/*
-			 * para fazer as confer�ncias sem�nticas, procure por 'messageName'
-			 * na superclasse/superclasse da superclasse etc
-			 */
-			lexer.nextToken();
+			
+			if(currentClass.getSuperclass() == null)
+				signalError.show("'super' used in class '"+currentClass.getName()+"' that does not have a superclass.");
+
+			KraClass foundSuperclass = null;
+			Method m = currentClass.searchSuperclassMethod(messageName, foundSuperclass);
+
+			if(m == null)
+				signalError.show("Method '"+messageName+"' was not found in the superclasses of '"+currentClass.getName()+"'.");
+
+			lexer.nextToken(); // pula nome do método
 			
 			exprList = realParameters();
 			
-			break;
+			assertCompatibleParameters(m, exprList);
+			
+			return new MessageSendToSuper(foundSuperclass, m, exprList);
 		
 		case IDENT:
 			/*
           	 * PrimaryExpr ::=  
           	 *                 Id  |
-          	 *                 Id "." Id | 
-          	 *                 Id "." Id "(" [ ExpressionList ] ")" |
+          	 *                 Id "." Id | // 1o id = classe, 2o id = static var
+          	 *                 Id "." Id "(" [ ExpressionList ] ")" | // 
           	 *                 Id "." Id "." Id "(" [ ExpressionList ] ")" |
 			 */
 
 			String firstId = lexer.getStringValue();
 			lexer.nextToken();
-			if ( lexer.token != Symbol.DOT ) {
-				// Id
-				// retorne um objeto da ASA que representa um identificador
-				return null;
+			
+			// Id
+			if ( lexer.token != Symbol.DOT )
+			{
+				Variable v = symbolTable.getInLocal(firstId);
+				
+				if(v == null)
+				{
+					if(lexer.token == Symbol.LEFTPAR)
+						signalError.show("Method calls must be associated with an object or class.");
+					else
+						signalError.show("Local variable '"+firstId+"' has not been declared.");
+				}
+				
+				return new IdExpr(v);
 			}
-			else { // Id "."
-				lexer.nextToken(); // coma o "."
-				if ( lexer.token != Symbol.IDENT ) {
-					signalError.show("Identifier expected");
-				}
-				else {
-					// Id "." Id
-					lexer.nextToken();
-					ident = lexer.getStringValue();
-					if ( lexer.token == Symbol.DOT ) {
-						// Id "." Id "." Id "(" [ ExpressionList ] ")"
-						/*
-						 * se o compilador permite vari�veis est�ticas, � poss�vel
-						 * ter esta op��o, como
-						 *     Clock.currentDay.setDay(12);
-						 * Contudo, se vari�veis est�ticas n�o estiver nas especifica��es,
-						 * sinalize um erro neste ponto.
-						 */
-						lexer.nextToken();
-						if ( lexer.token != Symbol.IDENT )
-							signalError.show("Identifier expected");
-						messageName = lexer.getStringValue();
-						lexer.nextToken();
-						exprList = this.realParameters();
+			
+			// Id "."
+			lexer.nextToken(); // coma o "."
+			if ( lexer.token != Symbol.IDENT )
+				signalError.show("Identifier expected");
 
-					}
-					else if ( lexer.token == Symbol.LEFTPAR ) {
-						// Id "." Id "(" [ ExpressionList ] ")"
-						exprList = this.realParameters();
-						/*
-						 * para fazer as confer�ncias sem�nticas, procure por
-						 * m�todo 'ident' na classe de 'firstId'
-						 */
-					}
-					else {
-						// retorne o objeto da ASA que representa Id "." Id
-					}
+			// Id "." Id
+			lexer.nextToken();
+			secondId = lexer.getStringValue();
+
+			// Id "." Id "." Id "(" [ ExpressionList ] ")"
+			if ( lexer.token == Symbol.DOT )
+			{
+				lexer.nextToken();
+				if ( lexer.token != Symbol.IDENT )
+					signalError.show("Identifier expected");
+				
+				messageName = lexer.getStringValue();
+				lexer.nextToken();
+				
+				// firstId tem que ser uma classe
+				KraClass firstIdClass = symbolTable.getInGlobal(firstId);
+				if(firstIdClass == null)
+					signalError.show("'"+firstId+"' is not a class for a static variable access.");
+				
+				// não está dentro da classe para acessar variáveis estáticas
+				if(firstIdClass != currentClass)
+					signalError.show("Static variables are private to their own classes.");
+				
+				// secondId tem que ser uma variável estática
+				InstanceVariable accessedStaticVar = firstIdClass.searchStaticInstVar(secondId);
+
+				if(accessedStaticVar == null)
+					signalError.show("Static variable '"+secondId+"' was not found in class '"+firstId+"'.");
+				
+				// classe da variável estática
+				KraClass secondIdClass = symbolTable.getInGlobal(accessedStaticVar.getType().getName());
+				
+				if(secondIdClass == null)
+					signalError.show("Static variable '"+secondId+"' is not a class for a method call.");
+				
+				// procura método público
+				Method calledMethod = secondIdClass.searchPublicMethod(messageName);
+
+				// se tiver dentro da classe, procura nos privados
+				if(calledMethod == null && currentClass == secondIdClass)
+					calledMethod = secondIdClass.searchPrivateMethod(messageName);
+				
+				// se ainda não achou, procura nas superclasses
+				if(calledMethod == null)
+				{
+					KraClass dummySuperclass = null;
+					calledMethod = secondIdClass.searchSuperclassMethod(secondId, dummySuperclass);
 				}
+
+				if(calledMethod == null)
+					signalError.show("Method '"+messageName+"' on object '"+secondId+"' was not found in its class '"+secondIdClass.getName()+"' or its superclasses.");
+				
+				exprList = this.realParameters();
+
+			}
+
+			// Id "." Id "(" [ ExpressionList ] ")"
+			else if ( lexer.token == Symbol.LEFTPAR ) {
+				exprList = this.realParameters();
+				
+				// se firstId é classe, secondId deve ser método estático
+				// se firstId é objeto, secondId deve ser método normal
+				Variable firstIdVar = symbolTable.getInLocal(firstId);
+				KraClass firstIdClass = null;
+				if(firstIdVar == null)
+					firstIdClass = symbolTable.getInGlobal(firstId);
+
+				Method calledStaticMethod = null;
+				Method calledNormalMethod = null;
+
+				if(firstIdClass == null && firstIdVar == null)
+					signalError.show("'"+firstId+"' is neither an object nor a class.");
+				else if(firstIdClass != null && firstIdVar != null)
+					signalError.show("'"+firstId+"' is both an object and a class... this is not supposed to happen.");
+
+				// firstId é uma classe
+				if(firstIdClass != null)
+				{
+					// procura método estático público
+					calledStaticMethod = firstIdClass.searchStaticPublicMethod(secondId);
+
+					// se estiver dentro da classe, procura nos métodos privados
+					if(calledStaticMethod == null && currentClass == firstIdClass)
+						calledStaticMethod = firstIdClass.searchStaticPrivateMethod(secondId);
+
+					if(calledStaticMethod == null)
+						signalError.show("Static method '"+secondId+"' was not found in class '"+firstId+"'.");
+				}
+
+				// firstId é um objeto
+				else if(firstIdVar != null)
+				{
+					// pega a classe do objeto
+					KraClass classOfTheObject = symbolTable.getInGlobal(firstIdVar.getType().getName());
+
+					// procura método público
+					calledNormalMethod = classOfTheObject.searchPublicMethod(secondId);
+
+					// se tiver dentro da classe, procura nos privados
+					if(calledNormalMethod == null && currentClass == classOfTheObject)
+						calledNormalMethod = classOfTheObject.searchPrivateMethod(secondId);
+					
+					// se ainda não achou, procura nas superclasses
+					if(calledNormalMethod == null)
+					{
+						KraClass dummySuperclass = null;
+						calledNormalMethod = classOfTheObject.searchSuperclassMethod(secondId, dummySuperclass);
+					}
+
+					if(calledNormalMethod == null)
+						signalError.show("Method '"+secondId+"' on object '"+firstId+"' was not found in its class '"+classOfTheObject.getName()+"' or its superclasses.");
+				}
+
+				// checa se parâmetros passados são compatíveis
+				if(calledStaticMethod != null)
+				{
+					assertCompatibleParameters(calledStaticMethod, exprList);
+					return new MessageSendToClass(firstIdClass, calledStaticMethod, exprList);
+				}
+				else if (calledNormalMethod != null)
+				{
+					assertCompatibleParameters(calledNormalMethod, exprList);
+					return new MessageSendToVariable(firstIdVar, calledNormalMethod, exprList);
+				}
+			}
+
+			else
+			{
+				// retorne o objeto da ASA que representa Id "." Id
+				//static var expr
+				KraClass calledClass = symbolTable.getInGlobal(firstId);
+
+				if(calledClass == null)
+					signalError.show("'"+firstId+"' is not a class for a static variable access.");
+
+				InstanceVariable staticInstVar = calledClass.searchStaticInstVar(secondId);
+
+				if(staticInstVar == null)
+					signalError.show("'"+secondId+"' is not a static variable of class '"+firstId+"'");
+
+				return new StaticVarAccessExpr(calledClass, staticInstVar);
 			}
 			break;
 			
@@ -1179,7 +1315,7 @@ public class Compiler {
 				lexer.nextToken();
 				if ( lexer.token != Symbol.IDENT )
 					signalError.show("Identifier expected");
-				ident = lexer.getStringValue();
+				secondId = lexer.getStringValue();
 				lexer.nextToken();
 				// j� analisou "this" "." Id
 				if ( lexer.token == Symbol.LEFTPAR ) {
@@ -1273,5 +1409,21 @@ public class Compiler {
 		}
 		
 		return false;
+	}
+	
+	private void assertCompatibleParameters(Method m, ExprList e)
+	{
+		// checa se parâmetros passados são compatíveis
+		Method dummyMethod = new Method("dummy", m.getType(), false, false);
+		
+		Iterator<Expr> it2 = e.elements();
+		while(it2.hasNext())
+		{
+			Type t = it2.next().getType();
+			dummyMethod.addParameter(new Variable("dummy", t));
+		}
+
+		if(!m.hasSameSignature(dummyMethod))
+			signalError.show("Incompatible parameters passed to method '"+m.getName()+"'.");
 	}
 }
