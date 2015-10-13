@@ -879,23 +879,23 @@ public class Compiler {
 			Expr right = simpleExpr();
 			// se forem de tipos compatíveis
 			if(typeCheck(left.getType(), right.getType())){
-				if(op != Symbol.LE || op != Symbol.LT ||
-					op != Symbol.GE || op != Symbol.GT){
+				if(op == Symbol.LE || op == Symbol.LT ||
+					op == Symbol.GE || op == Symbol.GT){
 					// apenas int pode ter essas operações
 					if(left.getType() != Type.intType)
-						signalError.show("type '"+left.getType().getCname()+
+						signalError.show("type '"+left.getType().getName()+
 							  "' does not support operator '"+op+"'");
 				}
-				else{ // EQ e NEQ
-					// boolean, int ou classes podem ter essas operações
-					if(left.getType() != Type.booleanType || left.getType() != Type.intType ||
-						symbolTable.getInGlobal(left.getType().getName()) == null ||
-						left.getType() == Type.stringType){
+				/*if(op == Symbol.EQ || op == Symbol.NEQ){ // EQ e NEQ
+					// boolean, int, string ou classes podem ter essas operações
+					if(left.getType() != Type.booleanType && left.getType() != Type.intType &&
+						symbolTable.getInGlobal(left.getType().getName()) == null &&
+						left.getType() != Type.stringType){
 						
-						signalError.show("type '"+left.getType().toString()+
+						signalError.show("type '"+left.getType().getName()+
 							  "' does not support operator '"+op+"'");
 					}
-				}
+				}*/
 			}
 			
 			left = new CompositeExpr(left, op, right);
@@ -919,12 +919,12 @@ public class Compiler {
 				if( (op == Symbol.PLUS || op == Symbol.MINUS) 
 					  && left.getType() != Type.intType){
 					
-					signalError.show("type "+left.getType().getCname()+
+					signalError.show("type "+left.getType().getName()+
 							  " does not support operation '"+op+"'");
 				}
 				// || com boolean
 				if(op == Symbol.OR && left.getType() != Type.booleanType){
-					signalError.show("type "+left.getType().getCname()+
+					signalError.show("type "+left.getType().getName()+
 							  " does not support operation '"+op+"'");
 				}
 			}
@@ -945,15 +945,15 @@ public class Compiler {
 			Expr right = signalFactor();
 			
 			if(typeCheck(left.getType(), right.getType())){
-				if((op == Symbol.DIV || op == Symbol.MULT) && 
+				if( (op == Symbol.DIV || op == Symbol.MULT) && 
 					  left.getType() != Type.intType){
 					
-					signalError.show("type '"+left.getType().getCname()+
+					signalError.show("type '"+left.getType().getName()+
 							  "' does not support operator '"+op+"'");
 				}
 				// && com boolean
 				if(op == Symbol.AND && left.getType() != Type.booleanType){
-					signalError.show("type '"+left.getType().getCname()+
+					signalError.show("type '"+left.getType().getName()+
 							  "' does not support operator '"+op+"'");
 				}
 			}
@@ -971,7 +971,7 @@ public class Compiler {
 			lexer.nextToken();
 			Expr e = factor();
 			if(e.getType() != Type.intType){
-				signalError.show("type '"+e.getType().getCname()+
+				signalError.show("type '"+e.getType().getName()+
 							  "' does not support operator '"+op+"'");
 			}
 			return new SignalExpr(op, e);
