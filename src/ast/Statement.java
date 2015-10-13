@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 abstract public class Statement {
 	
-	public ArrayList<Expr> exprList;
+	public ArrayList<Expr> exprList = new ArrayList();
 
 	abstract public void genKra(PW pw);
 

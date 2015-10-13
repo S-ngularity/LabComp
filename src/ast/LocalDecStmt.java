@@ -13,5 +13,6 @@ public class LocalDecStmt extends Statement
 	@Override
 	public void genKra(PW pw)
 	{
+		pw.print(declaredVar.toString());
 	}
 }

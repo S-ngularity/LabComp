@@ -660,7 +660,7 @@ public class Compiler {
 	}
 	
 	// IfStat ::= “if” “(” Expression “)” Statement [ “else” Statement ]
-	private void ifStatement() {
+	private Statement ifStatement() {
 		
 		Expr e;
 		Statement ifStmt, elseStmt;
@@ -675,51 +675,60 @@ public class Compiler {
 		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
 		lexer.nextToken();
 
-		//ifStmt = 
-			  statement();
+		ifStmt = statement();
 		
 		if ( lexer.token == Symbol.ELSE ) {
 			lexer.nextToken(); // pula else
-			//elseStmt = 
-				  statement();
+			elseStmt = statement();
 		}
 		else{
 			elseStmt = null;
 		}
 		
-		//return new IfStmt(e, ifStmt, elseStmt);
+		return new IfStmt(e, ifStmt, elseStmt);
 	}
 
 	// WhileStat ::= “while” “(” Expression “)” Statement
-	private void whileStatement() {
+	private Statement whileStatement() {
+		
+		Expr e;
+		Statement s;
 
 		lexer.nextToken(); // pula while
 		
 		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
 		lexer.nextToken();
 		
-		expr();
+		e = expr();
 		
 		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
 		lexer.nextToken();
 		
-		statement();
+		s = statement();
+		
+		return new WhileStmt(e, s);
 	}
 
 	// ReturnStat ::= "return" Expression ";"
-	private void returnStatement() {
+	private Statement returnStatement() {
+		
+		Expr e;
 
 		lexer.nextToken(); // pula return
 		
-		expr();
+		e = expr();
 		
 		if ( lexer.token != Symbol.SEMICOLON )
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken();
+		
+		return new ReturnStmt(e);
 	}
 
 	// ReadStat ::= “read” “(” LeftValue { “,” LeftValue } “)”
-	private void readStatement() {
+	private Statement readStatement() {
+		
+		ArrayList<String> leftValues = new ArrayList();
 		
 		lexer.nextToken(); // pula read
 		
@@ -739,6 +748,7 @@ public class Compiler {
 				signalError.show("Command 'read' is incomplete.");
 
 			String name = lexer.getStringValue();
+			leftValues.add(name);
 			// ----> CHECAR SE NAME EXISTE COMO INSTVAR DE THIS OU COMO LOCAL VAR
 			// ----> CHECAR ident.staticVar AQUI? EXPR()?
 			lexer.nextToken();
@@ -755,17 +765,19 @@ public class Compiler {
 		if ( lexer.token != Symbol.SEMICOLON )
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken();
+		
+		return new ReadStmt(leftValues);
 	}
 
 	// WriteStat ::= “write” “(” ExpressionList “)”
-	private void writeStatement() {
+	private Statement writeStatement() {
 
 		lexer.nextToken(); // pula write
 		
 		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
 		lexer.nextToken();
 		
-		exprList();
+		ArrayList<Expr> e = exprList();
 		
 		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
 		lexer.nextToken();
@@ -773,6 +785,8 @@ public class Compiler {
 		if ( lexer.token != Symbol.SEMICOLON )
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken();
+		
+		return new WriteStmt(e);
 	}
 
 	private void writelnStatement() {
