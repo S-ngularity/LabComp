@@ -425,8 +425,10 @@ public class Compiler {
 		currentMethod = null;
 	}
 
-	private void localDec() {
+	private StatementList localDec() {
 		// LocalDec ::= Type IdList ";"
+		
+		StatementList stmtList = new StatementList();
 
 		Type type = type();
 		if ( lexer.token != Symbol.IDENT ) signalError.show("Identifier expected");
@@ -438,7 +440,7 @@ public class Compiler {
 		}
 		else{
 			symbolTable.putInLocal(v.getName(), v);
-			currentMethod.addStatement(new LocalDecStmt(v));
+			stmtList.addElement(new LocalDecStmt(v));
 		}
 		
 		lexer.nextToken(); // pula IDENT
@@ -456,7 +458,7 @@ public class Compiler {
 			}
 			else{
 				symbolTable.putInLocal(var.getName(), var);
-				currentMethod.addStatement(new LocalDecStmt(var));
+				stmtList.addElement(new LocalDecStmt(var));
 			}
 
 			lexer.nextToken(); // pula IDENT
@@ -467,6 +469,8 @@ public class Compiler {
 		lexer.nextToken(); // pula ;
 		
 		// ID LIST? fica no while
+		
+		return stmtList;
 	}
 
 	private void formalParamDec() {
