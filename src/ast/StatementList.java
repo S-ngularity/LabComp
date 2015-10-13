@@ -2,7 +2,7 @@ package ast;
 
 import java.util.*;
 
-public class StatementList {
+public class StatementList extends Statement{
 
     public StatementList() {
        stList = new ArrayList<Statement>();
@@ -21,5 +21,10 @@ public class StatementList {
     }
 
     private ArrayList<Statement> stList;
+
+	@Override
+	public void genC(PW pw)
+	{
+	}
 
 }
