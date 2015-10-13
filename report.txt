@@ -1,8 +1,8 @@
 Relat�rio do Compilador
 
-43 de um total de 136 erros que deveriam ser sinalizados n�o o foram (31%)
+44 de um total de 136 erros que deveriam ser sinalizados n�o o foram (32%)
 0 erros foram sinalizados na linha errada (0%)
-2 erros foram sinalizados em 73 arquivos sem erro (2%)
+0 erros foram sinalizados em 73 arquivos sem erro (0%)
 
 Erros que deveriam ser sinalizados mas n�o foram:
 
@@ -15,10 +15,6 @@ ER-SEM04.KRA, 11, Type error: value of the right-hand side is not subtype of the
 ER-SEM05.KRA, 10, 'int' cannot be assigned to 'boolean' (comp.Compiler.assignExprLocalDec())
 
 ER-SEM07.KRA, 10, Message send to a non-object receiver (comp.Compiler.factor())
-
-ER-SEM08.KRA, 8, type boolean does not support operation '+' (comp.Compiler.simpleExpr())
-
-ER-SEM09.KRA, 12, type 'int' does not support operator '&&' (comp.Compiler.term())
 
 ER-SEM11.KRA, 10, non-boolean expression in  'while' command (comp.Compiler.whileStatement())
 
@@ -92,14 +88,14 @@ ER-SEM76.KRA, 16, Method 'm' was not found in class 'A' or its superclasses (com
 
 ER-SIN04.KRA, 8, Statement expected (comp.Compiler.assignExprLocalDec())
 
+ER-SIN18.KRA, 9, Missing ';' (comp.Compiler.assignExprLocalDec())
+
+ER-SIN21.KRA, 11, Missing ';' (comp.Compiler.assignExprLocalDec)
+
+ER-SIN22.KRA, 11, Missing ';' (comp.Compiler.assignExprLocalDec())
+
 Um ou mais arquivos de teste tinham erros, mas estes foram sinalizados nos n�meros de linhas corretos
-######################################################
-Erros que foram sinalizados mas n�o deveriam ter sido:
-
-OK-SEM01.KRA, 7, ) expected
-
-OK-SEM19.KRA, 32, ) expected
-
+O compilador n�o sinalizou nenhum erro que n�o deveria ter sinalizado
 ######################################################
 Em todos os testes abaixo, o compilador sinalizou o erro na linha correta (quando o teste tinha erros) ou n�o sinalizou o erro (quando o teste N�O tinha erros). Mas � necess�rio conferir se as mensagens emitidas pelo compilador s�o compat�veis com as mensagens de erro sugeridas pelas chamadas aos metaobjetos dos testes. 
 
@@ -148,6 +144,16 @@ The 'ce' message is:      "Variable 'i' is being redeclared"
 ER-SEM06.KRA
 The compiler message was: "Statement expected"
 The 'ce' message is:      "'operator expected' or 'variable expected at the left-hand side of a assignment'"
+
+
+ER-SEM08.KRA
+The compiler message was: "type int does not support operation '+'"
+The 'ce' message is:      "type boolean does not support operation '+'"
+
+
+ER-SEM09.KRA
+The compiler message was: "type 'int' does not support operator '&&'"
+The 'ce' message is:      "type 'int' does not support operator '&&'"
 
 
 ER-SEM17.KRA
@@ -400,11 +406,6 @@ The compiler message was: "; expected"
 The 'ce' message is:      "Missing ';'"
 
 
-ER-SIN18.KRA
-The compiler message was: "';' expected"
-The 'ce' message is:      "Missing ';'"
-
-
 ER-SIN19.KRA
 The compiler message was: "; expected"
 The 'ce' message is:      "Missing ';'"
@@ -412,16 +413,6 @@ The 'ce' message is:      "Missing ';'"
 
 ER-SIN20.KRA
 The compiler message was: "; expected"
-The 'ce' message is:      "Missing ';'"
-
-
-ER-SIN21.KRA
-The compiler message was: "';' expected"
-The 'ce' message is:      "Missing ';'"
-
-
-ER-SIN22.KRA
-The compiler message was: "';' expected"
 The 'ce' message is:      "Missing ';'"
 
 

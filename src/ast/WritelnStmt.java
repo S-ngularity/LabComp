@@ -4,17 +4,17 @@
 */
 package ast;
 
-public class WriteStmt extends Statement{
+public class WritelnStmt extends Statement{
 	
 	ExprList exprs;
 	
-	public WriteStmt(ExprList e){
+	public WritelnStmt(ExprList e){
 		exprs = e;
 	}
 
 	@Override
 	public void genKra(PW pw) {
-		pw.print("write(");
+		pw.print("writeln(");
 		exprs.genKra(pw);
 		pw.println(");");
 	}

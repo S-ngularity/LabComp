@@ -541,31 +541,38 @@ public class Compiler {
 
 // ----> ONDE GUARDAR AS COISAS ABAIXO?
 	
-	private void compositeStatement() {
+	private Statement compositeStatement() {
 
 		lexer.nextToken(); // pula {
-		statementList();
+		Statement s = statementList();
 		if ( lexer.token != Symbol.RIGHTCURBRACKET )
 			signalError.show("} expected");
 		else
 			lexer.nextToken();
+		
+		return s;
 	}
 
-	private void statementList() {
+	private Statement statementList() {
+		StatementList s = new StatementList();
 		// CompStatement ::= "{" { Statement } "}"
 		// StatementList ::= { Statement }
 		Symbol tk;
 		// statements always begin with an identifier, if, read, write, ...
 		while ((tk = lexer.token) != Symbol.RIGHTCURBRACKET && tk != Symbol.ELSE)
-			statement();
+			s.addElement(statement());
+		
+		return s;
 	}
 
-	private void statement() {
+	private Statement statement() {
 		/*
 		 * Statement ::= Assignment ``;'' | IfStat |WhileStat | MessageSend
 		 *                ``;'' | ReturnStat ``;'' | ReadStat ``;'' | WriteStat ``;'' |
 		 *               ``break'' ``;'' | ``;'' | CompStatement | LocalDec
 		 */
+		
+		Statement s = null;
 
 		switch (lexer.token) {
 		case THIS:
@@ -574,38 +581,39 @@ public class Compiler {
 		case INT:
 		case BOOLEAN:
 		case STRING:
-			assignExprLocalDec();
+			s = assignExprLocalDec();
 			break;
 		case RETURN:
-			returnStatement();
+			s = returnStatement();
 			break;
 		case READ:
-			readStatement();
+			s = readStatement();
 			break;
 		case WRITE:
-			writeStatement();
+			s = writeStatement();
 			break;
 		case WRITELN:
-			writelnStatement();
+			s = writelnStatement();
 			break;
 		case IF:
-			ifStatement();
+			s = ifStatement();
 			break;
 		case BREAK:
-			breakStatement();
+			s = breakStatement();
 			break;
 		case WHILE:
-			whileStatement();
+			s = whileStatement();
 			break;
 		case SEMICOLON:
-			nullStatement();
+			s = nullStatement();
 			break;
 		case LEFTCURBRACKET:
-			compositeStatement();
+			s = compositeStatement();
 			break;
 		default:
 			signalError.show("Statement expected");
 		}
+		return s;
 	}
 
 	/*
@@ -617,7 +625,9 @@ public class Compiler {
 	}
 
 	// AssignExprLocalDec ::= Expression [ ``$=$'' Expression ] | LocalDec
-	private Expr assignExprLocalDec() {
+	private Statement assignExprLocalDec() {
+		
+		Statement s;
 
 		if ( lexer.token == Symbol.INT || lexer.token == Symbol.BOOLEAN
 				|| lexer.token == Symbol.STRING ||
@@ -631,8 +641,8 @@ public class Compiler {
 			 * LocalDec ::= Type IdList ";"
 			 */
 			
-			localDec();
-			return null; // (?)
+			s = localDec();
+			return s;
 		}
 		
 		// é uma declaração de objeto de uma classe que não foi declarada
@@ -644,19 +654,26 @@ public class Compiler {
 		/*
 		 * AssignExprLocalDec ::= Expression [ "=" Expression ]
 		 */
-		expr();
+		
+		Expr left, right=null;
+		left = expr();
+		
 		if ( lexer.token == Symbol.ASSIGN ) {
 			lexer.nextToken();
-			expr();
+			right = expr();
+			
+			// ----> VERIFICAÇÃO SEMÂNTICA DE TIPOS AQUI
+			if( !typeCheck(left.getType(), right.getType()) ){
+				signalError.show("'"+left.getType()+"' cannot be assigned to '"+right.getType()+"'");
+			}
+			
 			if ( lexer.token != Symbol.SEMICOLON )
 				signalError.show("';' expected", true);
 			else
 				lexer.nextToken();
 		}
 
-		// ----> TALVEZ DEVA-SE CHECAR O ; E DAR NEXTTOKEN AQUI FORA EM VEZ DE DENTRO DO IF?
-
-		return null;
+		return new AssignExpr(left, right);
 	}
 	
 	// IfStat ::= “if” “(” Expression “)” Statement [ “else” Statement ]
@@ -777,7 +794,7 @@ public class Compiler {
 		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
 		lexer.nextToken();
 		
-		ArrayList<Expr> e = exprList();
+		ExprList e = exprList();
 		
 		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
 		lexer.nextToken();
@@ -789,14 +806,14 @@ public class Compiler {
 		return new WriteStmt(e);
 	}
 
-	private void writelnStatement() {
+	private Statement writelnStatement() {
 
 		lexer.nextToken(); // pula writeln
 		
 		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
 		lexer.nextToken();
 		
-		exprList();
+		ExprList e = exprList();
 		
 		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
 		lexer.nextToken();
@@ -804,18 +821,25 @@ public class Compiler {
 		if ( lexer.token != Symbol.SEMICOLON )
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken();
+		
+		return new WritelnStmt(e);
 	}
 
-	private void breakStatement() {
+	private Statement breakStatement() {
 		lexer.nextToken(); // pula break
 		
 		if ( lexer.token != Symbol.SEMICOLON )
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken();
+		
+		return new BreakStatement();
+		
 	}
 
-	private void nullStatement() {
+	private Statement nullStatement() {
 		lexer.nextToken(); // pula ;
+		
+		return new NullStatement();
 	}
 	
 	private ExprList realParameters() {
@@ -853,6 +877,27 @@ public class Compiler {
 				|| op == Symbol.LT || op == Symbol.GE || op == Symbol.GT ) {
 			lexer.nextToken();
 			Expr right = simpleExpr();
+			// se forem de tipos compatíveis
+			if(typeCheck(left.getType(), right.getType())){
+				if(op != Symbol.LE || op != Symbol.LT ||
+					op != Symbol.GE || op != Symbol.GT){
+					// apenas int pode ter essas operações
+					if(left.getType() != Type.intType)
+						signalError.show("type '"+left.getType().getCname()+
+							  "' does not support operator '"+op+"'");
+				}
+				else{ // EQ e NEQ
+					// boolean, int ou classes podem ter essas operações
+					if(left.getType() != Type.booleanType || left.getType() != Type.intType ||
+						symbolTable.getInGlobal(left.getType().getName()) == null ||
+						left.getType() == Type.stringType){
+						
+						signalError.show("type '"+left.getType().toString()+
+							  "' does not support operator '"+op+"'");
+					}
+				}
+			}
+			
 			left = new CompositeExpr(left, op, right);
 		}
 		return left;
@@ -868,6 +913,21 @@ public class Compiler {
 				|| op == Symbol.OR) {
 			lexer.nextToken();
 			Expr right = term();
+			
+			if(typeCheck(left.getType(), right.getType())){
+				// + e - com int
+				if( (op == Symbol.PLUS || op == Symbol.MINUS) 
+					  && left.getType() != Type.intType){
+					
+					signalError.show("type "+left.getType().getCname()+
+							  " does not support operation '"+op+"'");
+				}
+				// || com boolean
+				if(op == Symbol.OR && left.getType() != Type.booleanType){
+					signalError.show("type "+left.getType().getCname()+
+							  " does not support operation '"+op+"'");
+				}
+			}
 			left = new CompositeExpr(left, op, right);
 		}
 		return left;
@@ -883,6 +943,21 @@ public class Compiler {
 				|| op == Symbol.AND) {
 			lexer.nextToken();
 			Expr right = signalFactor();
+			
+			if(typeCheck(left.getType(), right.getType())){
+				if((op == Symbol.DIV || op == Symbol.MULT) && 
+					  left.getType() != Type.intType){
+					
+					signalError.show("type '"+left.getType().getCname()+
+							  "' does not support operator '"+op+"'");
+				}
+				// && com boolean
+				if(op == Symbol.AND && left.getType() != Type.booleanType){
+					signalError.show("type '"+left.getType().getCname()+
+							  "' does not support operator '"+op+"'");
+				}
+			}
+			
 			left = new CompositeExpr(left, op, right);
 		}
 		return left;
@@ -894,7 +969,12 @@ public class Compiler {
 		Symbol op;
 		if ( (op = lexer.token) == Symbol.PLUS || op == Symbol.MINUS ) {
 			lexer.nextToken();
-			return new SignalExpr(op, factor());
+			Expr e = factor();
+			if(e.getType() != Type.intType){
+				signalError.show("type '"+e.getType().getCname()+
+							  "' does not support operator '"+op+"'");
+			}
+			return new SignalExpr(op, e);
 		}
 		else
 			return factor();
@@ -1154,5 +1234,44 @@ public class Compiler {
 				|| token == Symbol.LEFTPAR || token == Symbol.NULL
 				|| token == Symbol.IDENT || token == Symbol.LITERALSTRING;
 
+	}
+	
+	public boolean typeCheck(Type leftType, Type rightType){
+		
+		if(rightType != null){
+			//tipos básicos (boolean, int e string) e iguais
+			if(	(leftType == Type.booleanType ||
+				leftType == Type.intType ||
+				leftType == Type.stringType) &&
+				leftType == rightType){
+
+				return true;
+			}
+			// direita é subclasse da esquerda (classe é subclasse dela mesma)
+			KraClass rightClass = symbolTable.getInGlobal(rightType.getName());
+
+			if(rightClass != null){
+				KraClass leftClass = symbolTable.getInGlobal(leftType.getName());
+
+				if(rightClass.getName().equals(leftClass.getName()) ){ // mesma classe
+					return true;
+				}
+
+				KraClass superRight = rightClass.getSuperclass();
+				while(superRight != null){
+					if(superRight.getName().equals(leftClass.getName())){
+						return true;
+					}
+					superRight = superRight.getSuperclass();
+				}
+			}
+		}
+		// esquerda é classe e direita é null
+		if(symbolTable.getInGlobal(leftType.getName()) != null &&
+			  rightType == null){
+			return true;
+		}
+		
+		return false;
 	}
 }

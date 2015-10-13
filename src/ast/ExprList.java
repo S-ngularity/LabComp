@@ -16,7 +16,7 @@ public class ExprList {
         exprList.add(expr);
     }
 
-    public void genC( PW pw ) {
+    public void genKra( PW pw ) {
 
         int size = exprList.size();
         for ( Expr e : exprList ) {
