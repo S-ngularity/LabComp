@@ -1,3 +1,7 @@
+/*
+	Filipe Santos Rocchi			552194
+	Rafael Brandão Barbosa Fairbanks	552372
+*/
 package ast;
 
 public class ParenthesisExpr extends Expr {
@@ -6,9 +10,9 @@ public class ParenthesisExpr extends Expr {
         this.expr = expr;
     }
     
-    public void genC( PW pw, boolean putParenthesis ) {
+    public void genKra( PW pw, boolean putParenthesis ) {
         pw.print("(");
-        expr.genC(pw, false);
+        expr.genKra(pw, false);
         pw.printIdent(")");
     }
     

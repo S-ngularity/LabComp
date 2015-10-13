@@ -1,3 +1,7 @@
+/*
+	Filipe Santos Rocchi			552194
+	Rafael Brandão Barbosa Fairbanks	552372
+*/
 
 package ast;
 
@@ -11,7 +15,7 @@ public class UnaryExpr extends Expr {
 	}
 
 	@Override
-	public void genC(PW pw, boolean putParenthesis) {
+	public void genKra(PW pw, boolean putParenthesis) {
 		switch (op) {
 		case PLUS:
 			pw.print("+");
@@ -26,7 +30,7 @@ public class UnaryExpr extends Expr {
 			pw.print(" internal error at UnaryExpr::genC");
 
 		}
-		expr.genC(pw, false);
+		expr.genKra(pw, false);
 	}
 
 	@Override

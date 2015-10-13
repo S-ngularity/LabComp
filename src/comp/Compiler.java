@@ -1,4 +1,7 @@
-
+/*
+	Filipe Santos Rocchi			552194
+	Rafael Brandão Barbosa Fairbanks	552372
+*/
 package comp;
 
 import ast.*;
@@ -610,8 +613,8 @@ public class Compiler {
 			/*
 			 * uma declara��o de vari�vel. 'lexer.token' � o tipo da vari�vel
 			 * 
-			 * AssignExprLocalDec ::= Expression [ ``$=$'' Expression ] | LocalDec 
-			 * LocalDec ::= Type IdList ``;''
+			 * AssignExprLocalDec ::= Expression [ "=" Expression ] | LocalDec 
+			 * LocalDec ::= Type IdList ";"
 			 */
 			
 			localDec();
@@ -619,7 +622,7 @@ public class Compiler {
 		}
 
 		/*
-		 * AssignExprLocalDec ::= Expression [ ``$=$'' Expression ]
+		 * AssignExprLocalDec ::= Expression [ "=" Expression ]
 		 */
 		expr();
 		if ( lexer.token == Symbol.ASSIGN ) {
@@ -638,23 +641,33 @@ public class Compiler {
 	
 	// IfStat ::= “if” “(” Expression “)” Statement [ “else” Statement ]
 	private void ifStatement() {
+		
+		Expr e;
+		Statement ifStmt, elseStmt;
 
 		lexer.nextToken(); // pula if
 		
 		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
 		lexer.nextToken();
 		
-		expr();
+		e = expr();
 		
 		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
 		lexer.nextToken();
 
-		statement();
+		//ifStmt = 
+			  statement();
 		
 		if ( lexer.token == Symbol.ELSE ) {
 			lexer.nextToken(); // pula else
-			statement();
+			//elseStmt = 
+				  statement();
 		}
+		else{
+			elseStmt = null;
+		}
+		
+		//return new IfStmt(e, ifStmt, elseStmt);
 	}
 
 	// WhileStat ::= “while” “(” Expression “)” Statement
@@ -673,7 +686,7 @@ public class Compiler {
 		statement();
 	}
 
-	// ReturnStat ::= “return” Expression
+	// ReturnStat ::= "return" Expression ";"
 	private void returnStatement() {
 
 		lexer.nextToken(); // pula return
@@ -1031,6 +1044,7 @@ public class Compiler {
 				}
 			}
 			break;
+			
 		case THIS:
 			/*
 			 * Este 'case THIS:' trata os seguintes casos: 

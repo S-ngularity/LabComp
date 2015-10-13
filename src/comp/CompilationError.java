@@ -1,9 +1,13 @@
+/*
+	Filipe Santos Rocchi			552194
+	Rafael BrandÃ£o Barbosa Fairbanks	552372
+*/
 package comp;
 
 /**
  * a compilation error
  * 
-   @author José
+   @author Josï¿½
  */
 public class CompilationError {
 

@@ -1,3 +1,7 @@
+/*
+	Filipe Santos Rocchi			552194
+	Rafael Brandão Barbosa Fairbanks	552372
+*/
 package ast;
 
 import lexer.*;
@@ -13,17 +17,17 @@ public class CompositeExpr extends Expr {
     }
     
     @Override
-	public void genC( PW pw, boolean putParenthesis ) {
+	public void genKra( PW pw, boolean putParenthesis ) {
         if ( putParenthesis )
           pw.print("(");
-        left.genC(pw, true);
+        left.genKra(pw, true);
         String strSymbol = arrayOper.get(oper);
         if ( strSymbol == null ) {
         	pw.println("internal error in CompositeExpr::genC");
         }
         else
             pw.print(" " + strSymbol + " ");
-        right.genC(pw, true);
+        right.genKra(pw, true);
         if ( putParenthesis )
           pw.print(")");
     }

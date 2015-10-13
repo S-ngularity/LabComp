@@ -1,3 +1,7 @@
+/*
+	Filipe Santos Rocchi			552194
+	Rafael Brandão Barbosa Fairbanks	552372
+*/
 package comp;
 
 public class CompilerOptions {

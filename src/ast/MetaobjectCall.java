@@ -1,3 +1,7 @@
+/*
+	Filipe Santos Rocchi			552194
+	Rafael BrandÃ£o Barbosa Fairbanks	552372
+*/
 /**
   
  */
@@ -13,7 +17,7 @@ import java.util.ArrayList;
  * end <br>
  * </code>
  * 
-   @author José
+   @author Josï¿½
    
  */
 public class MetaobjectCall {

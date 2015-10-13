@@ -1,3 +1,7 @@
+/*
+	Filipe Santos Rocchi			552194
+	Rafael Brandão Barbosa Fairbanks	552372
+*/
 package ast;
 
 public class LiteralInt extends Expr {
@@ -9,7 +13,7 @@ public class LiteralInt extends Expr {
     public int getValue() {
         return value;
     }
-    public void genC( PW pw, boolean putParenthesis ) {
+    public void genKra( PW pw, boolean putParenthesis ) {
         pw.printIdent("" + value);
     }
     

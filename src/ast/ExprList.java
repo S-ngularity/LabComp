@@ -1,3 +1,7 @@
+/*
+	Filipe Santos Rocchi			552194
+	Rafael Brandão Barbosa Fairbanks	552372
+*/
 package ast;
 
 import java.util.*;
@@ -16,7 +20,7 @@ public class ExprList {
 
         int size = exprList.size();
         for ( Expr e : exprList ) {
-        	e.genC(pw, false);
+        	e.genKra(pw, false);
             if ( --size > 0 )
                 pw.print(", ");
         }

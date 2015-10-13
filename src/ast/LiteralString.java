@@ -1,3 +1,7 @@
+/*
+	Filipe Santos Rocchi			552194
+	Rafael Brandão Barbosa Fairbanks	552372
+*/
 package ast;
 
 public class LiteralString extends Expr {
@@ -6,7 +10,7 @@ public class LiteralString extends Expr {
         this.literalString = literalString;
     }
     
-    public void genC( PW pw, boolean putParenthesis ) {
+    public void genKra( PW pw, boolean putParenthesis ) {
         pw.print(literalString);
     }
     
