@@ -1,6 +1,6 @@
 Relat�rio do Compilador
 
-46 de um total de 136 erros que deveriam ser sinalizados n�o o foram (33%)
+43 de um total de 136 erros que deveriam ser sinalizados n�o o foram (31%)
 0 erros foram sinalizados na linha errada (0%)
 2 erros foram sinalizados em 73 arquivos sem erro (2%)
 
@@ -9,8 +9,6 @@ Erros que deveriam ser sinalizados mas n�o foram:
 ER-SEM01.KRA, 16, Missing 'return' statement in method 'm' (comp.Compiler.methodDec())
 
 ER-SEM02.KRA, 9, Variable 'I' was not declared (comp.Compiler.assignExprLocalDec())
-
-ER-SEM03.KRA, 10, Variable 'i' is being redeclared (comp.Compiler.localDec())
 
 ER-SEM04.KRA, 11, Type error: value of the right-hand side is not subtype of the variable of the left-hand side. (comp.Compiler.assignExprLocalDec())
 
@@ -33,10 +31,6 @@ ER-SEM14.KRA, 12, Command 'write' does not accept 'boolean' expressions (comp.Co
 ER-SEM15.KRA, 9, Operator '!' does not accepts 'int' values (comp.Compiler.factor())
 
 ER-SEM16.KRA, 11, Operator '-' does not accepts 'boolean' expressions (comp.Compiler.signalFactor())
-
-ER-SEM18.KRA, 9, Type 'k' was not found (comp.Compiler.localDec())
-
-ER-SEM19.KRA, 8, Type 'Program' was not found (comp.Compiler.localDec())
 
 ER-SEM26.KRA, 9, 'break' statement found outside a 'while' statement (comp.Compiler.statement()))
 
@@ -146,6 +140,11 @@ The compiler message was: "Number out of limits"
 The 'ce' message is:      "literal int out of limites"
 
 
+ER-SEM03.KRA
+The compiler message was: "Local variable 'i' has already been declared."
+The 'ce' message is:      "Variable 'i' is being redeclared"
+
+
 ER-SEM06.KRA
 The compiler message was: "Statement expected"
 The 'ce' message is:      "'operator expected' or 'variable expected at the left-hand side of a assignment'"
@@ -154,6 +153,16 @@ The 'ce' message is:      "'operator expected' or 'variable expected at the left
 ER-SEM17.KRA
 The compiler message was: "Command 'read' is incomplete."
 The 'ce' message is:      "Command 'read' expects a variable"
+
+
+ER-SEM18.KRA
+The compiler message was: "Type 'k' was not found."
+The 'ce' message is:      "Type 'k' was not found"
+
+
+ER-SEM19.KRA
+The compiler message was: "Type 'Program' was not found."
+The 'ce' message is:      "Type 'Program' was not found"
 
 
 ER-SEM20.KRA
@@ -207,12 +216,12 @@ The 'ce' message is:      "Method 'i' has name equal to an instance variable"
 
 
 ER-SEM32.KRA
-The compiler message was: "Method 'm' has already been declared;"
+The compiler message was: "Method 'm' has already been declared."
 The 'ce' message is:      "Method 'm' is being redeclared"
 
 
 ER-SEM33.KRA
-The compiler message was: "Method 'm' has already been declared;"
+The compiler message was: "Method 'm' has already been declared."
 The 'ce' message is:      "Method 'm' is being redeclared"
 
 
@@ -252,12 +261,12 @@ The 'ce' message is:      "'.' or '=' expected after identifier OR statement exp
 
 
 ER-SEM70.KRA
-The compiler message was: "Method 'm' has already been declared;"
+The compiler message was: "Method 'm' has already been declared."
 The 'ce' message is:      "Method 'm' is being redefined"
 
 
 ER-SEM73.KRA
-The compiler message was: "Static method 'm' has already been declared;"
+The compiler message was: "Static method 'm' has already been declared."
 The 'ce' message is:      "Redefinition of static method 'm'"
 
 
@@ -467,7 +476,7 @@ The 'ce' message is:      "Type expected"
 
 
 ER-SIN33.KRA
-The compiler message was: "Identifier expected"
+The compiler message was: "Class 'x' has not been declared"
 The 'ce' message is:      "Identifier expected"
 
 
@@ -482,7 +491,7 @@ The 'ce' message is:      "')' expected"
 
 
 ER-SIN36.KRA
-The compiler message was: "Identifier expected"
+The compiler message was: "Class 'm' has not been declared"
 The 'ce' message is:      "Identifier expected"
 
 
@@ -547,7 +556,7 @@ The 'ce' message is:      "Identifier expected"
 
 
 ER-SIN56.KRA
-The compiler message was: "Identifier expected"
+The compiler message was: "Class 'm' has not been declared"
 The 'ce' message is:      "Identifier expected"
 
 

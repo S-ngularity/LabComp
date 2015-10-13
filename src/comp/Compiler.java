@@ -331,7 +331,7 @@ public class Compiler {
 			if(currentClass.searchStaticPublicMethod(name) != null || 
 				currentClass.searchStaticPrivateMethod(name) != null)
 			{
-				signalError.show("Static method '"+name+"' has already been declared;");
+				signalError.show("Static method '"+name+"' has already been declared.");
 			}
 			
 			if(currentClass.searchStaticInstVar(name) != null)
@@ -343,7 +343,7 @@ public class Compiler {
 			if(currentClass.searchPublicMethod(name) != null || 
 			   currentClass.searchPrivateMethod(name) != null)
 			{
-				signalError.show("Method '"+name+"' has already been declared;");
+				signalError.show("Method '"+name+"' has already been declared.");
 			}
 			
 			if(currentClass.searchInstVar(name) != null)
@@ -416,6 +416,9 @@ public class Compiler {
 		if ( lexer.token != Symbol.RIGHTCURBRACKET ) signalError.show("} expected");
 		lexer.nextToken();
 		
+		// variáveis locais saem do escopo
+		symbolTable.removeLocalIdent();
+		
 		//if(!currentMethod.hasReturn())
 		//	signalError.show("Missing 'return' in method '"+currentMethod.getName()+"'");
 
@@ -429,12 +432,13 @@ public class Compiler {
 		if ( lexer.token != Symbol.IDENT ) signalError.show("Identifier expected");
 		Variable v = new Variable(lexer.getStringValue(), type);
 		
-		// ----> CHECAR SE JÁ FOI DECLARADO E ADICIONAR AO ESCOPO LOCAL
-		if(symbolTable.get(v.getName()) != null){
-			signalError.show("Variable '"+v.getName()+"' has already declared");
+		// checa se já não foi declarado e adiciona nas vars locais
+		if(symbolTable.getInLocal(v.getName()) != null){
+			signalError.show("Local variable '"+v.getName()+"' has already been declared.");
 		}
 		else{
 			symbolTable.putInLocal(v.getName(), v);
+			currentMethod.addStatement(new LocalDecStmt(v));
 		}
 		
 		lexer.nextToken(); // pula IDENT
@@ -444,17 +448,18 @@ public class Compiler {
 
 			if ( lexer.token != Symbol.IDENT )
 				signalError.show("Identifier expected");
-			v = new Variable(lexer.getStringValue(), type);
+			Variable var = new Variable(lexer.getStringValue(), type);
 
-			// ----> CHECAR SE JÁ FOI DECLARADO E ADICIONAR AO ESCOPO LOCAL
-			if(symbolTable.get(v.getName()) != null){
-				signalError.show("Variable '"+v.getName()+"' has already declared");
+			// checa se já não foi declarado e adiciona nas vars locais
+			if(symbolTable.getInLocal(var.getName()) != null){
+				signalError.show("Local variable '"+var.getName()+"' has already been declared.");
 			}
 			else{
-				symbolTable.putInLocal(v.getName(), v);
+				symbolTable.putInLocal(var.getName(), var);
+				currentMethod.addStatement(new LocalDecStmt(var));
 			}
 
-			lexer.nextToken(); // PULA IDENT
+			lexer.nextToken(); // pula IDENT
 		}
 		
 		if ( lexer.token != Symbol.SEMICOLON )
@@ -480,10 +485,18 @@ public class Compiler {
 		Type t = type();
 		
 		if ( lexer.token != Symbol.IDENT ) signalError.show("Identifier expected");
-		String paramName = lexer.getStringValue();
-		lexer.nextToken();
 		
-		currentMethod.addParameter(new Variable(paramName, t));
+		Variable v = new Variable(lexer.getStringValue(), t);
+		
+		if(symbolTable.getInLocal(v.getName()) != null){
+			signalError.show("Local variable (parameter) '"+v.getName()+"' has already been declared.");
+		}
+		else{
+			symbolTable.putInLocal(v.getName(), v);
+			currentMethod.addParameter(v);
+		}
+		
+		lexer.nextToken();
 	}
 
 	private Type type() {
@@ -504,15 +517,12 @@ public class Compiler {
 			result = Type.stringType;
 			break;
 		case IDENT:
-			// # corrija: fa�a uma busca na TS para buscar a classe
-			// IDENT deve ser uma classe.
-			
-			// ----> BUSCAR NA GLOBAL TABLE PELO NOME DA CLASSE
+			// retorna classe como o tipo, se tiver sido declarada
 			if(!isType(lexer.getStringValue())){
 				signalError.show("Class '"+lexer.getStringValue()+"' has not been declared");
 			}
 
-			result = null;
+			result = symbolTable.getInGlobal(lexer.getStringValue());
 			break;
 		default:
 			signalError.show("Type expected");
@@ -616,6 +626,12 @@ public class Compiler {
 			
 			localDec();
 			return null; // (?)
+		}
+		
+		// é uma declaração de objeto de uma classe que não foi declarada
+		else if(lexer.token == Symbol.IDENT && !isType(lexer.getStringValue()) && lexer.isNextTokenIdent())
+		{
+			signalError.show("Type '"+lexer.getStringValue()+"' was not found.");
 		}
 
 		/*
