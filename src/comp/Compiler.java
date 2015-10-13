@@ -430,6 +430,12 @@ public class Compiler {
 		Variable v = new Variable(lexer.getStringValue(), type);
 		
 		// ----> CHECAR SE JÁ FOI DECLARADO E ADICIONAR AO ESCOPO LOCAL
+		if(symbolTable.get(v.getName()) != null){
+			signalError.show("Variable '"+v.getName()+"' has already declared");
+		}
+		else{
+			symbolTable.putInLocal(v.getName(), v);
+		}
 		
 		lexer.nextToken(); // pula IDENT
 
@@ -441,6 +447,12 @@ public class Compiler {
 			v = new Variable(lexer.getStringValue(), type);
 
 			// ----> CHECAR SE JÁ FOI DECLARADO E ADICIONAR AO ESCOPO LOCAL
+			if(symbolTable.get(v.getName()) != null){
+				signalError.show("Variable '"+v.getName()+"' has already declared");
+			}
+			else{
+				symbolTable.putInLocal(v.getName(), v);
+			}
 
 			lexer.nextToken(); // PULA IDENT
 		}
@@ -449,7 +461,7 @@ public class Compiler {
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken(); // pula ;
 		
-		// ID LIST?
+		// ID LIST? fica no while
 	}
 
 	private void formalParamDec() {
@@ -496,6 +508,9 @@ public class Compiler {
 			// IDENT deve ser uma classe.
 			
 			// ----> BUSCAR NA GLOBAL TABLE PELO NOME DA CLASSE
+			if(!isType(lexer.getStringValue())){
+				signalError.show("Class '"+lexer.getStringValue()+"' has not been declared");
+			}
 
 			result = null;
 			break;
@@ -524,8 +539,7 @@ public class Compiler {
 		// StatementList ::= { Statement }
 		Symbol tk;
 		// statements always begin with an identifier, if, read, write, ...
-		while ((tk = lexer.token) != Symbol.RIGHTCURBRACKET
-				&& tk != Symbol.ELSE)
+		while ((tk = lexer.token) != Symbol.RIGHTCURBRACKET && tk != Symbol.ELSE)
 			statement();
 	}
 
