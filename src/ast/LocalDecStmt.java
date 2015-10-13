@@ -7,11 +7,11 @@ public class LocalDecStmt extends Statement
 	{
 		declaredVar = v;
 	}
-
-	@Override
-	public void genC(PW pw)
-	{
-	}
 	
 	Variable declaredVar;
+
+	@Override
+	public void genKra(PW pw)
+	{
+	}
 }

@@ -23,8 +23,9 @@ public class StatementList extends Statement{
     private ArrayList<Statement> stList;
 
 	@Override
-	public void genC(PW pw)
+	public void genKra(PW pw)
 	{
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
 }
