@@ -1,8 +1,8 @@
 Relat�rio do Compilador
 
-2 de um total de 136 erros que deveriam ser sinalizados n�o o foram (1%)
+2 de um total de 133 erros que deveriam ser sinalizados n�o o foram (1%)
 3 erros foram sinalizados na linha errada (2%)
-1 erros foram sinalizados em 73 arquivos sem erro (1%)
+1 erros foram sinalizados em 76 arquivos sem erro (1%)
 
 Erros que deveriam ser sinalizados mas n�o foram:
 
@@ -130,11 +130,6 @@ The compiler message was: "Command 'write' does not accept 'boolean' expressions
 The 'ce' message is:      "Command 'write' does not accept 'boolean' expressions"
 
 
-ER-SEM16.KRA
-The compiler message was: "type 'boolean' does not support operator '-'."
-The 'ce' message is:      "Operator '-' does not accepts 'boolean' expressions"
-
-
 ER-SEM17.KRA
 The compiler message was: "Command 'read' only accepts variables."
 The 'ce' message is:      "Command 'read' expects a variable"
@@ -156,11 +151,6 @@ The 'ce' message is:      "Identifier expected"
 
 
 ER-SEM21.KRA
-The compiler message was: "Identifier expected"
-The 'ce' message is:      "Identifier expected"
-
-
-ER-SEM22.KRA
 The compiler message was: "Identifier expected"
 The 'ce' message is:      "Identifier expected"
 
@@ -263,11 +253,6 @@ The 'ce' message is:      "Type error: 'null' cannot be assigned to a variable o
 ER-SEM44.KRA
 The compiler message was: "Command 'write' does not accept objects"
 The 'ce' message is:      "Command 'write' does not accept objects"
-
-
-ER-SEM45.KRA
-The compiler message was: "Command 'read' does not accept variables of type 'A', only 'int' and 'String'."
-The 'ce' message is:      "'int' or 'String' expression expected"
 
 
 ER-SEM46.KRA
