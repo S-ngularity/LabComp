@@ -19,6 +19,21 @@ public class Method {
 		isFinal = isMethodFinal;
 		isStatic = isMethodStatic;
     }
+	
+	public void genKra(PW pw)
+	{
+		pw.print(getType().getName()+" "+getName()+"(");
+		parameterList.genKra(pw);
+		pw.println(")");
+		pw.printlnIdent("{");
+		
+		pw.add();
+		stmtList.genKra(pw);
+		pw.sub();
+		
+		pw.println("");
+		pw.printlnIdent("}");
+	}
 
     public String getName() { return name; }
 

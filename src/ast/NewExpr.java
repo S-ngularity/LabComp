@@ -11,6 +11,7 @@ public class NewExpr extends Expr
 	@Override
 	public void genKra(PW pw, boolean putParenthesis)
 	{
+		pw.print("new "+getType().getName()+"()");
 	}
 
 	@Override

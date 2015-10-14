@@ -19,7 +19,10 @@ public class MessageSendToSelf extends MessageSend {
     }
     
 	@Override
-    public void genKra( PW pw, boolean putParenthesis ) {
+    public void genKra( PW pw, boolean putParenthesis )
+	{
+		pw.print("this.");
+		super.genKra(pw, false);
     }
     
     KraClass self;

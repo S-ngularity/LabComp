@@ -14,9 +14,9 @@ public class WriteStmt extends Statement{
 
 	@Override
 	public void genKra(PW pw) {
-		pw.print("write(");
+		pw.printIdent("write(");
 		exprs.genKra(pw);
-		pw.println(");");
+		pw.print(");");
 	}
 	
 }

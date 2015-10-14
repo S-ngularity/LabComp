@@ -12,11 +12,11 @@ public class LocalDecStmt extends Statement
 		declaredVar = v;
 	}
 	
-	Variable declaredVar;
-
 	@Override
 	public void genKra(PW pw)
 	{
-		pw.print(declaredVar.toString());
+		pw.printIdent(declaredVar.getType().getName()+" "+declaredVar.getName()+";");
 	}
+	
+	Variable declaredVar;
 }

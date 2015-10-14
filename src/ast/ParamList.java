@@ -11,6 +11,21 @@ public class ParamList {
     public ParamList() {
        paramList = new ArrayList<Variable>();
     }
+	
+	public void genKra(PW pw)
+	{
+		Iterator<Variable> it = elements();
+		
+		while(it.hasNext())
+		{
+			Variable v = it.next();
+			
+			pw.print(v.getType().getName()+" "+v.getName());
+			
+			if(it.hasNext())
+				pw.print(", ");
+		}
+	}
 
     public void addElement(Variable v) {
        paramList.add(v);

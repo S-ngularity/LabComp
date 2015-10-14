@@ -2,7 +2,7 @@ Relat�rio do Compilador
 
 3 de um total de 136 erros que deveriam ser sinalizados n�o o foram (2%)
 0 erros foram sinalizados na linha errada (0%)
-5 erros foram sinalizados em 73 arquivos sem erro (6%)
+4 erros foram sinalizados em 73 arquivos sem erro (5%)
 
 Erros que deveriam ser sinalizados mas n�o foram:
 
@@ -16,13 +16,11 @@ Um ou mais arquivos de teste tinham erros, mas estes foram sinalizados nos n�m
 ######################################################
 Erros que foram sinalizados mas n�o deveriam ter sido:
 
-OK-SEM01.KRA, 7, Variable 'A' does not exist
+OK-SEM01.KRA, 7, Command 'read' does not accept variables of type 'A', only 'int' and 'String'.
 
 OK-SEM05.KRA, 50, Type error: type of the expression returned is not the declared return type
 
 OK-SEM15.KRA, 25, Incompatible parameters passed to method 'accept'.
-
-OK-SEM19.KRA, 32, Variable 'A' does not exist
 
 OK-SIN07.KRA, 70, Incompatible parameters passed to method 'setNext'.
 
@@ -112,7 +110,7 @@ The 'ce' message is:      "type 'int' does not support operator '&&'"
 
 
 ER-SEM11.KRA
-The compiler message was: "non-boolean expression in  'while' command"
+The compiler message was: "Non-boolean expression in  'while' command."
 The 'ce' message is:      "non-boolean expression in  'while' command"
 
 
@@ -122,7 +120,7 @@ The 'ce' message is:      "operator '+' of 'int' expects an 'int' value"
 
 
 ER-SEM13.KRA
-The compiler message was: "Command 'read' does not accept 'ast.TypeBoolean@6bc7c054' variables"
+The compiler message was: "Command 'read' does not accept variables of type 'boolean', only 'int' and 'String'."
 The 'ce' message is:      "Command 'read' does not accept 'boolean' variables"
 
 
@@ -142,7 +140,7 @@ The 'ce' message is:      "Operator '-' does not accepts 'boolean' expressions"
 
 
 ER-SEM17.KRA
-The compiler message was: "Command 'read' is incomplete."
+The compiler message was: "Command 'read' only accepts variables."
 The 'ce' message is:      "Command 'read' expects a variable"
 
 
@@ -272,7 +270,7 @@ The 'ce' message is:      "Command 'write' does not accept objects"
 
 
 ER-SEM45.KRA
-The compiler message was: "Command 'read' does not accept 'ast.KraClass@232204a1' variables"
+The compiler message was: "Command 'read' does not accept variables of type 'A', only 'int' and 'String'."
 The 'ce' message is:      "'int' or 'String' expression expected"
 
 
@@ -462,7 +460,7 @@ The 'ce' message is:      "Statement expected"
 
 
 ER-SIN05.KRA
-The compiler message was: "Command 'read' is incomplete."
+The compiler message was: "Expression expected"
 The 'ce' message is:      "Expression expected"
 
 
@@ -472,7 +470,7 @@ The 'ce' message is:      "Expression expected"
 
 
 ER-SIN07.KRA
-The compiler message was: "Command 'read' is incomplete."
+The compiler message was: "Expression expected"
 The 'ce' message is:      "Command 'read' without arguments"
 
 

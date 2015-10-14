@@ -24,12 +24,21 @@ public class StatementList extends Statement{
         return stList.size();
     }
 
-    private ArrayList<Statement> stList;
-
 	@Override
 	public void genKra(PW pw)
 	{
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		Iterator<Statement> it = elements();
+		
+		while(it.hasNext())
+		{
+			Statement s = it.next();
+			
+			s.genKra(pw);
+			
+			if(it.hasNext())
+				pw.println("");
+		}
 	}
-
+	
+    private ArrayList<Statement> stList;
 }

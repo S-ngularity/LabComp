@@ -18,27 +18,32 @@ public class IfStmt extends Statement{
 
 	@Override
 	public void genKra(PW pw) {
-		pw.print("if (");
+		pw.printIdent("if(");
 		
 		for(Expr e : exprList)
 			e.genKra(pw, false);
 		
-		pw.println("){");
+		pw.println(")");
+		pw.printlnIdent("{");
 		pw.add();
 		
 		ifStmt.genKra(pw);
 		
 		if(elseStmt != null){
 			pw.sub();
-			pw.println("}"); //fecha o if
+			pw.println("");
+			pw.printlnIdent("}"); //fecha o if
 			
-			pw.println("else{");
+			pw.println("");
+			pw.printlnIdent("else");
+			pw.printlnIdent("{");
 			pw.add();
 			elseStmt.genKra(pw);
 		}
 		
 		pw.sub();
-		pw.println("}");
+		pw.println("");
+		pw.printIdent("}");
 	}
 	
 }

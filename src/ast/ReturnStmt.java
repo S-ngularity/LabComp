@@ -12,9 +12,9 @@ public class ReturnStmt extends Statement{
 
 	@Override
 	public void genKra(PW pw) {
-		pw.print("return ");
+		pw.printIdent("return ");
 		exprList.get(0).genKra(pw, false);
-		pw.println(";");
+		pw.print(";");
 	}
 	
 }

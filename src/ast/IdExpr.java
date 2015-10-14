@@ -11,6 +11,13 @@ public class IdExpr extends Expr
 	@Override
 	public void genKra(PW pw, boolean putParenthesis)
 	{
+		if ( putParenthesis )
+			pw.print("(");
+		
+		pw.print(v.getName());
+		
+		if ( putParenthesis )
+			pw.print(")");
 	}
 
 	@Override

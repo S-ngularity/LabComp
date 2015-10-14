@@ -3,6 +3,9 @@
 	Rafael Brandão Barbosa Fairbanks	552372
 */
 package ast;
+
+import java.util.Iterator;
+
 /*
  * Krakatoa Class
  */
@@ -22,6 +25,71 @@ public class KraClass extends Type {
 		privateStaticMethodList = new MethodList();
 		
 		orderedMemberList = new OrderedClassMemberList();
+   }
+   
+   public void genKra(PW pw)
+   {
+	   if(isFinal)
+		   pw.print("final ");
+	   
+	   pw.printlnIdent("class "+super.getName());
+	   pw.printlnIdent("{");
+	   pw.add();
+	   
+	   Iterator<Object> it = orderedMemberList.elements();
+	   
+	   while(it.hasNext())
+	   {
+		   Object o = it.next();
+		   
+		   if(o instanceof InstanceVariable)
+		   {
+				InstanceVariable v = (InstanceVariable) o;
+
+				pw.printIdent("");
+
+				if(searchStaticInstVar(v.getName()) != null)
+					pw.print("static ");
+
+				v.genKra(pw);
+		   }
+		   
+		   else if(o instanceof Method)
+		   {
+				Method m = (Method) o;
+				
+				pw.printIdent("");
+				
+				if(m.isFinal())
+					pw.print("final ");
+
+				if(m.isStatic())
+				{
+					pw.print("static ");
+					
+					if(searchStaticPrivateMethod(m.getName()) != null)
+						pw.print("private ");
+					else
+						pw.print("public ");
+				}
+				
+				else
+				{
+					if(searchPrivateMethod(m.getName()) != null)
+						pw.print("private ");
+					else
+						pw.print("public ");
+				}
+
+				m.genKra(pw);
+		   }
+		   
+		   if(it.hasNext())
+			   pw.println("");
+	   }
+	   
+	   pw.sub();
+	   pw.printIdent("}");
    }
    
    public String getCname() {

@@ -18,8 +18,10 @@ public class MessageSendToClass extends MessageSend {
     }
 
 	@Override
-    public void genKra( PW pw, boolean putParenthesis ) {
-        
+    public void genKra( PW pw, boolean putParenthesis )
+	{
+		pw.print(tClass.getName()+".");
+		super.genKra(pw, false);
     }
     
 	KraClass tClass;

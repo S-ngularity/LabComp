@@ -14,7 +14,7 @@ public class LiteralInt extends Expr {
         return value;
     }
     public void genKra( PW pw, boolean putParenthesis ) {
-        pw.printIdent("" + value);
+        pw.print("" + value);
     }
     
     public Type getType() {

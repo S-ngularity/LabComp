@@ -19,8 +19,10 @@ public class MessageSendToVariable extends MessageSend {
     }
     
 	@Override
-    public void genKra( PW pw, boolean putParenthesis ) {
-        
+    public void genKra( PW pw, boolean putParenthesis )
+	{
+		pw.print(v.getName()+".");
+		super.genKra(pw, false);
     }
 
     private Variable v;

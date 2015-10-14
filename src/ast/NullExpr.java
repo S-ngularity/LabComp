@@ -7,7 +7,7 @@ package ast;
 public class NullExpr extends Expr {
     
    public void genKra( PW pw, boolean putParenthesis ) {
-      pw.printIdent("NULL");
+      pw.print("null");
    }
    
    public Type getType() {

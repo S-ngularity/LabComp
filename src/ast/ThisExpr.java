@@ -1,11 +1,6 @@
-package comp;
+package ast;
 
-import ast.Expr;
-import ast.KraClass;
-import ast.PW;
-import ast.Type;
-
-class ThisExpr extends Expr
+public class ThisExpr extends Expr
 {
 
 	public ThisExpr(KraClass thisClass)
@@ -16,6 +11,7 @@ class ThisExpr extends Expr
 	@Override
 	public void genKra(PW pw, boolean putParenthesis)
 	{
+		pw.print("this");
 	}
 
 	@Override

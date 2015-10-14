@@ -11,8 +11,9 @@ public class LiteralBoolean extends Expr {
     }
 
     @Override
-	public void genKra( PW pw, boolean putParenthesis ) {
-       pw.print( value ? "1" : "0" );
+	public void genKra( PW pw, boolean putParenthesis )
+	{
+		pw.print( value ? "true" : "false" );
     }
 
     @Override

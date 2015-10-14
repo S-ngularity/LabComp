@@ -15,14 +15,17 @@ public class WhileStmt extends Statement{
 
 	@Override
 	public void genKra(PW pw) {
-		pw.print("while(");
-		exprList.get(0);
-		pw.println("){");
+		pw.printIdent("while(");
+		exprList.get(0).genKra(pw, false);
+		pw.println(")");
+		pw.printlnIdent("{");
 		pw.add();
 		
 		stmt.genKra(pw);
+		
 		pw.sub();
-		pw.println("}");
+		pw.println("");
+		pw.printIdent("}");
 	}
 	
 }

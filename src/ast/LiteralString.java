@@ -10,8 +10,9 @@ public class LiteralString extends Expr {
         this.literalString = literalString;
     }
     
-    public void genKra( PW pw, boolean putParenthesis ) {
-        pw.print(literalString);
+    public void genKra( PW pw, boolean putParenthesis )
+	{
+        pw.print("\""+literalString+"\"");
     }
     
     public Type getType() {

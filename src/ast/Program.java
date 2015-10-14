@@ -18,6 +18,12 @@ public class Program {
 
 
 	public void genKra(PW pw) {
+		for(KraClass k : classList)
+		{
+			k.genKra(pw);
+			pw.println("");
+			pw.println("");
+		}
 	}
 
 	public void genC(PW pw) {

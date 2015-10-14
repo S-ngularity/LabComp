@@ -45,9 +45,9 @@ public class Compiler {
 			while ( lexer.token == Symbol.MOCall ) {
 				metaobjectCallList.add(metaobjectCall());
 			}
-			classDec();
+			kraClassList.add(classDec());
 			while ( lexer.token == Symbol.CLASS || lexer.token == Symbol.FINAL )
-				classDec();
+				kraClassList.add(classDec());
 			if ( lexer.token != Symbol.EOF ) {
 				signalError.show("End of file expected");
 			}
@@ -131,7 +131,7 @@ public class Compiler {
 		return new MetaobjectCall(name, metaobjectParamList);
 	}
 
-	private void classDec() {
+	private KraClass classDec() {
 		// Note que os m�todos desta classe n�o correspondem exatamente �s
 		// regras
 		// da gram�tica. Este m�todo classDec, por exemplo, implementa
@@ -285,6 +285,8 @@ public class Compiler {
 		lexer.nextToken();
 		
 		currentClass = null;
+		
+		return newClass;
 	}
 
 	private void instanceVarDec(Type type, String name, boolean isVarStatic) {
@@ -433,8 +435,7 @@ public class Compiler {
 		}
 		else{ // se for void não pode ter return
 			if(hasReturn){
-				//signalError.show();
-				signalError.show("Illegal 'return' statement. Method returns 'void'", true);
+				signalError.show("Illegal 'return' statement. Method returns 'void'.", true);
 			}
 		}
 		hasReturn = false;
@@ -494,8 +495,6 @@ public class Compiler {
 		if ( lexer.token != Symbol.SEMICOLON )
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken(); // pula ;
-		
-		// ID LIST? fica no while
 		
 		return stmtList;
 	}
@@ -699,9 +698,19 @@ public class Compiler {
 				signalError.show("';' expected", true);
 			else
 				lexer.nextToken();
+			
+			return new AssignStmt(left, right);
 		}
 
-		return new AssignExpr(left, right);
+		if(left instanceof MessageSend)
+		{
+			lexer.nextToken(); // pula ; após chamada de método isolada
+			
+			MessageSend msgSend = (MessageSend) left;
+			return new MessageSendStatement(msgSend);
+		}
+		
+		throw new NullPointerException();
 	}
 	
 	// IfStat ::= “if” “(” Expression “)” Statement [ “else” Statement ]
@@ -749,7 +758,7 @@ public class Compiler {
 		e = expr();
 		
 		if(e.getType() != Type.booleanType){
-			signalError.show("non-boolean expression in  'while' command");
+			signalError.show("Non-boolean expression in  'while' command.");
 		}
 		
 		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
@@ -786,7 +795,7 @@ public class Compiler {
 	// ReadStat ::= “read” “(” LeftValue { “,” LeftValue } “)”
 	private Statement readStatement() {
 		
-		ArrayList<String> leftValues = new ArrayList();
+		ExprList valuesToRead = new ExprList();
 		
 		lexer.nextToken(); // pula read
 		
@@ -795,72 +804,33 @@ public class Compiler {
 		
 		while (true)
 		{
-			if ( lexer.token == Symbol.THIS ) {
-				lexer.nextToken(); // pula 'this'
-				
-				if ( lexer.token != Symbol.DOT ) signalError.show(". expected");
-				lexer.nextToken();
-			}
+			//if ( lexer.token != Symbol.IDENT )
+			//	signalError.show("Command 'read' is incomplete.");
 
-			if ( lexer.token != Symbol.IDENT )
-				signalError.show("Command 'read' is incomplete.");
-
-			String name = lexer.getStringValue();
+			Expr e = expr();
 			
-			// ----> CHECAR SE NAME EXISTE COMO INSTVAR DE THIS OU COMO LOCAL VAR
-			// ----> CHECAR ident.staticVar AQUI? EXPR()?
-			// local
-			boolean existName = false;
-			if(symbolTable.getInLocal(name) != null){
-				if(symbolTable.getInLocal(name).getType() != Type.intType &&
-					symbolTable.getInLocal(name).getType() != Type.stringType){
-					
-					signalError.show("Command 'read' does not accept '"+
-						symbolTable.getInLocal(name).getType()
-						  +"' variables");
+			if(e instanceof IdExpr || e instanceof StaticInstVarAccessExpr || e instanceof SelfInstVarAccessExpr)
+			{
+				if(e.getType() != Type.intType &&
+					e.getType() != Type.stringType)
+				{
+					signalError.show("Command 'read' does not accept variables of type '"+e.getType().getName()+"', only 'int' and 'String'.");
+					break;
 				}
-				
-				existName = true;
-			}
-			else{
-				// static
-				if( currentClass.searchStaticInstVar(name) != null){
-					if( currentClass.searchStaticInstVar(name).getType() != Type.intType && 
-						currentClass.searchStaticInstVar(name).getType() != Type.stringType){
-					
-						signalError.show("Command 'read' does not accept '"+
-									  currentClass.searchStaticInstVar(name).getType()
-										  +"' variables");
-					}
-					
-					existName = true;
-				}
-				
-				// instance
-				if( currentClass.searchInstVar(name) != null){
-					if( currentClass.searchInstVar(name).getType() != Type.intType && 
-						currentClass.searchInstVar(name).getType() != Type.stringType){
-					
-						signalError.show("Command 'read' does not accept '"+
-									  currentClass.searchInstVar(name).getType()
-										  +"' variables");
-					}
-				
-					existName = true;
-				}
+
+				valuesToRead.addElement(e);
+
+				if ( lexer.token == Symbol.COMMA )
+					lexer.nextToken();
+				else
+					break;
 			}
 			
-			if(existName)
-				leftValues.add(name);
 			else
-				signalError.show("Variable '"+name+"' does not exist");
-			
-			lexer.nextToken();
-
-			if ( lexer.token == Symbol.COMMA )
-				lexer.nextToken();
-			else
+			{
+				signalError.show("Command 'read' only accepts variables.");
 				break;
+			}
 		}
 
 		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
@@ -870,7 +840,7 @@ public class Compiler {
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken();
 		
-		return new ReadStmt(leftValues);
+		return new ReadStmt(valuesToRead);
 	}
 
 	// WriteStat ::= “write” “(” ExpressionList “)”
@@ -914,7 +884,21 @@ public class Compiler {
 		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
 		lexer.nextToken();
 		
-		ExprList e = exprList();
+		ExprList exprlist = exprList();
+		Iterator<Expr> exprs = exprlist.elements();
+		while(exprs.hasNext()){
+			Expr e = exprs.next();
+			if(e.getType() == Type.booleanType){
+				signalError.show("Command 'writeln' does not accept 'boolean' expressions");
+			}
+			else if(	e.getType() != Type.booleanType &&
+					e.getType() != Type.intType &&
+					e.getType() != Type.stringType && 
+					e.getType() != Type.voidType){
+				
+				signalError.show("Command 'writeln' does not accept objects");
+			}
+		}
 		
 		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
 		lexer.nextToken();
@@ -923,7 +907,7 @@ public class Compiler {
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken();
 		
-		return new WritelnStmt(e);
+		return new WritelnStmt(exprlist);
 	}
 
 	private Statement breakStatement() {
@@ -1231,6 +1215,9 @@ public class Compiler {
 			
 			exprList = realParameters();
 			
+			//if(lexer.token == Symbol.SEMICOLON)
+			//	lexer.nextToken(); // pula ; se for statement
+			
 			assertCompatibleParameters(m, exprList);
 			
 			return new MessageSendToSuper(foundSuperclass, m, exprList);
@@ -1413,7 +1400,7 @@ public class Compiler {
 				if(staticInstVar == null)
 					signalError.show("'"+secondId+"' is not a static variable of class '"+firstId+"'.");
 
-				return new InstVarAccessExpr(calledClass, staticInstVar);
+				return new StaticInstVarAccessExpr(calledClass, staticInstVar);
 			}
 			break;
 			
@@ -1531,7 +1518,7 @@ public class Compiler {
 				if(instVar == null)
 					signalError.show("'"+secondId+"' is not a variable of class '"+currentClass.getName()+"'.");
 
-				return new InstVarAccessExpr(currentClass, instVar);
+				return new SelfInstVarAccessExpr(currentClass, instVar);
 			}
 		
 			default:

@@ -8,26 +8,19 @@ import java.util.ArrayList;
 
 public class ReadStmt extends Statement{
 	
-	ArrayList<String> leftValues;
+	ExprList varsToRead;
 	
-	public ReadStmt(ArrayList<String> s){
-		leftValues = s;
+	public ReadStmt(ExprList valuesToRead){
+		varsToRead = valuesToRead;
 	}
 
 	@Override
 	public void genKra(PW pw) {
-		pw.print("read (");
+		pw.printIdent("read (");
 		
-		int i=0;
-		for(String s : leftValues){
-			if(i!=0){
-				pw.print(", ");
-			}
-			pw.print(s);
-			i++;
-		}
+		varsToRead.genKra(pw);
 		
-		pw.println(");");
+		pw.print(");");
 	}
 	
 }

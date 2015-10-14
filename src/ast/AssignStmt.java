@@ -4,25 +4,26 @@
 */
 package ast;
 
-public class AssignExpr extends Statement{
+public class AssignStmt extends Statement{
 	
 	Expr left, right;
 	
-	public AssignExpr(Expr l, Expr r){
+	public AssignStmt(Expr l, Expr r){
 		this.left = l;
 		this.right = r;
 	}
 
 	@Override
 	public void genKra(PW pw) {
-		left.genKra(pw, true);
+		pw.printIdent("");
+		left.genKra(pw, false);
 		
 		if(right!= null){
 			pw.print(" = ");
-			right.genKra(pw, true);
+			right.genKra(pw, false);
 		}
 		
-		pw.println(";");
+		pw.print(";");
 	}
 	
 }

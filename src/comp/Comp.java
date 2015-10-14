@@ -243,7 +243,8 @@ public class Comp {
         	   
         	   
 			   // GERAÇÃO DE CÓDIGO
-			   /*FileOutputStream  outputStream;
+			   //*
+			   FileOutputStream  outputStream;
                try {
                   outputStream = new FileOutputStream(outputFileName + ".kra2");
                } catch ( IOException e ) {
