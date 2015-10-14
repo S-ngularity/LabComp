@@ -4,7 +4,7 @@
 class Program {
    
    public void run() {
-      int i;
+      Int i;
 	  i = 0;
       if ( ! i ) {  //#
       }

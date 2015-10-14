@@ -1,4 +1,4 @@
-@ce(8, "Palavra reservada utilizada como variavel", 
+@ce(7, "Palavra reservada utilizada como variavel", 
   "Identifier expected", "comp.Compiler.localDec()")
   
       

@@ -381,11 +381,11 @@ public class Compiler {
 		
 		// checa se redefine método final (não-estático)
 		Method m = currentClass.searchSuperclassMethod(name, null);
-		if(m != null && !currentMethod.isStatic() && currentMethod.hasSameSignature(m) && m.isFinal())
+		if(m != null && !currentMethod.isStatic() && isMethodConvRtoL(m, currentMethod, true) && m.isFinal())
 			signalError.show("Method '"+name+"' is overriding a final method.");
 		
 		// checa se tem mesma assinatura de método redefinido
-		if(m != null && !currentMethod.isStatic() && !currentMethod.hasSameSignature(m))
+		if(m != null && !currentMethod.isStatic() && !isMethodConvRtoL(m, currentMethod, true))
 			signalError.show("Method '"+name+"' has a different signature from overriden method in "
 							 + "superclass '"+currentClass.getSuperclass().getName()+"'.");
 		
@@ -409,7 +409,7 @@ public class Compiler {
 		// checa semântica do método Program.run()
 		if(currentClass.getName().equals("Program") && currentMethod.getName().equals("run"))
 		{
-			if(!currentMethod.hasSameSignature(new Method("run", Type.voidType, false, false)))
+			if(!isMethodConvRtoL(new Method("targetRun", Type.voidType, false, false), currentMethod, true))
 				signalError.show("Program.run() must return type 'void' and cannot take parameters.");
 			if(qualifier != Symbol.PUBLIC)
 				signalError.show("Program.run() must be public.");
@@ -690,7 +690,7 @@ public class Compiler {
 			}
 			
 			// ----> VERIFICAÇÃO SEMÂNTICA DE TIPOS AQUI
-			if( !typeCheck(left.getType(), right.getType()) ){
+			if( !isTypeConvRtoL(left.getType(), right.getType(), false) ){
 				signalError.show("Right type '"+right.getType().getName()+"' cannot be assigned to left type '"+left.getType().getName()+"'.");
 			}
 			
@@ -704,9 +704,13 @@ public class Compiler {
 
 		if(left instanceof MessageSend)
 		{
+			MessageSend msgSend = (MessageSend) left;
+			
+			if(msgSend.getType() != Type.voidType)
+				signalError.show("Message send returns value that is not used.");
+			
 			lexer.nextToken(); // pula ; após chamada de método isolada
 			
-			MessageSend msgSend = (MessageSend) left;
 			return new MessageSendStatement(msgSend);
 		}
 		
@@ -781,8 +785,11 @@ public class Compiler {
 		e = expr();
 		
 		// ----> necessário checar se o tipo de retorno esperado é correto
-		if(e.getType() != currentMethodReturnType){
-			signalError.show("Type error: type of the expression returned is not the declared return type");
+		if(!isTypeConvRtoL(currentMethodReturnType, e.getType(), false)){
+			if(currentMethodReturnType == Type.voidType)
+				signalError.show("Illegal 'return' statement. Method returns 'void'.");
+			else
+				signalError.show("Type error: type of the expression returned is not the declared return type");
 		}
 		
 		if ( lexer.token != Symbol.SEMICOLON )
@@ -969,7 +976,7 @@ public class Compiler {
 			
 			Expr right = simpleExpr();
 			// se forem de tipos compatíveis
-			if(typeCheck(left.getType(), right.getType())){
+			if(isTypeConvRtoL(left.getType(), right.getType(), false)){
 			/*	if(op == Symbol.EQ || op == Symbol.NEQ){
 					if(left.getType() == Type.nullType){ // precisa saber quando é nullType
 						signalError.show("Incompatible types cannot be compared with '"+
@@ -1012,7 +1019,7 @@ public class Compiler {
 			lexer.nextToken();
 			Expr right = term();
 			
-			if(typeCheck(left.getType(), right.getType())){
+			if(isTypeConvRtoL(left.getType(), right.getType(), false)){
 				// + e - com int
 				if( (op == Symbol.PLUS || op == Symbol.MINUS) 
 					  && left.getType() != Type.intType){
@@ -1045,7 +1052,7 @@ public class Compiler {
 			lexer.nextToken();
 			Expr right = signalFactor();
 			
-			if(typeCheck(left.getType(), right.getType())){
+			if(isTypeConvRtoL(left.getType(), right.getType(), false)){
 				if( (op == Symbol.DIV || op == Symbol.MULT) && 
 					  left.getType() != Type.intType){
 					
@@ -1551,13 +1558,19 @@ public class Compiler {
 
 	}
 	
-	public boolean typeCheck(Type leftType, Type rightType){
+	public boolean isTypeConvRtoL(Type leftType, Type rightType, boolean strict)
+	{
+		if(leftType == null)
+			throw new NullPointerException("LEFT TYPE NULL");
+		if(rightType == null)
+			throw new NullPointerException("RIGHT TYPE NULL");
 
-		if(rightType != null){
+		if(rightType != Type.nullType){
 			//tipos básicos (boolean, int e string) e iguais
 			if(	leftType == Type.booleanType ||
 				leftType == Type.intType ||
-				leftType == Type.stringType){
+				leftType == Type.stringType ||
+				leftType == Type.voidType){
 				// mesmo nome
 				if(leftType.getName().equals(rightType.getName())){
 					return true;
@@ -1566,6 +1579,7 @@ public class Compiler {
 					return false;
 				}
 			}
+			
 			// direita é subclasse da esquerda (classe é subclasse dela mesma)
 			KraClass rightClass = symbolTable.getInGlobal(rightType.getName());
 
@@ -1575,19 +1589,27 @@ public class Compiler {
 				if(leftClass == null)
 					return false;
 
-				if(rightClass.getName().equals(leftClass.getName()) ){ // mesma classe
+				// mesma classe
+				if(rightClass.getName().equals(leftClass.getName()) ){
 					return true;
 				}
 
-				KraClass superRight = rightClass.getSuperclass();
-				while(superRight != null){
-					if(superRight.getName().equals(leftClass.getName())){
-						return true;
+				else if(!strict)
+				{
+					KraClass superRight = rightClass.getSuperclass();
+					while(superRight != null){
+						if(superRight.getName().equals(leftClass.getName())){
+							return true;
+						}
+						superRight = superRight.getSuperclass();
 					}
-					superRight = superRight.getSuperclass();
 				}
+				
+				// classe da direita não é subclasse da direita (ou mesma classe se strict)
+				return false;
 			}
 		}
+		
 		// esquerda é classe e direita é null
 		if(symbolTable.getInGlobal(leftType.getName()) != null &&
 			  rightType == Type.nullType){
@@ -1602,15 +1624,52 @@ public class Compiler {
 		// checa se parâmetros passados são compatíveis
 		Method dummyMethod = new Method("dummy", m.getType(), false, false);
 		
+		int i = 0;
 		Iterator<Expr> it2 = e.elements();
 		while(it2.hasNext())
 		{
+			++i;
 			Type t = it2.next().getType();
-			dummyMethod.addParameter(new Variable("dummy", t));
+			dummyMethod.addParameter(new Variable("dummy"+i, t));
 		}
 
-		if(!m.hasSameSignature(dummyMethod))
+		if(!isMethodConvRtoL(m, dummyMethod, false))
 			signalError.show("Incompatible parameters passed to method '"+m.getName()+"'.");
+	}
+	
+	public boolean isMethodConvRtoL(Method m, Method m2, boolean strict)
+	{
+		//return m.hasSameSignature(m2);
+		// tipo de retorno
+		if(!isTypeConvRtoL(m.getType(), m2.getType(), strict))
+		{
+			return false;
+		}
+
+		// mesmo número e tipos dos parâmetros
+		if(m.getParamList().getSize() == m2.getParamList().getSize())
+		{
+			Iterator<Variable> thisIt = m2.getParamList().elements();
+			Iterator<Variable> thatIt = m.getParamList().elements();
+			
+			while(thisIt.hasNext())
+			{
+				Variable thisVar = thisIt.next();
+				Variable thatVar = thatIt.next();
+				
+				// parâmetros diferentes
+				if(!isTypeConvRtoL(thatVar.getType(), thisVar.getType(), false))
+				{
+					return false;
+				}
+			}
+			
+			return true;
+		}
+		
+		// número diferente de parâmetros
+		else
+			return false;
 	}
 	
 	
