@@ -12,6 +12,7 @@ public class NullExpr extends Expr {
    
    public Type getType() {
       //# corrija
-      return null;
+      //return null;
+	   return Type.nullType;
    }
 }

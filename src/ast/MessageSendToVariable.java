@@ -4,20 +4,21 @@
 */
 package ast;
 
-
 public class MessageSendToVariable extends MessageSend { 
 	
-	public MessageSendToVariable(Variable var, Method message, ExprList args)
+	public MessageSendToVariable(Variable var, Method message, ExprList params)
 	{
-		super(message, args);
+		super(message, params);
 		
 		v = var;
 	}
 
+	@Override
     public Type getType() { 
         return super.m.getType();
     }
     
+	@Override
     public void genKra( PW pw, boolean putParenthesis ) {
         
     }

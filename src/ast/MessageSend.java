@@ -7,10 +7,10 @@ package ast;
 
 abstract class MessageSend  extends Expr  {
 	
-	public MessageSend(Method message, ExprList args)
+	public MessageSend(Method message, ExprList params)
 	{
 		m = message;
-		exprList = args;
+		exprList = params;
 	}
 	
 	protected Method m;

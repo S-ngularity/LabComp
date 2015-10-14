@@ -15,6 +15,8 @@ abstract public class Type {
     public static Type stringType = new TypeString();
     public static Type voidType = new TypeVoid();
     public static Type undefinedType = new TypeUndefined();
+	
+	public static Type nullType = new KraClass("null", true);
 
     public String getName() {
         return name;

@@ -6,16 +6,18 @@ package ast;
 
 public class MessageSendToSuper extends MessageSend { 
 	
-	public MessageSendToSuper(KraClass actualSuperclass, Method message, ExprList args)
+	public MessageSendToSuper(KraClass actualSuperclass, Method message, ExprList params)
 	{
-		super(message, args);
+		super(message, params);
 		superclass = actualSuperclass;
 	}
 
+	@Override
     public Type getType() { 
         return super.m.getType();
     }
 
+	@Override
     public void genKra( PW pw, boolean putParenthesis ) {
         
     }

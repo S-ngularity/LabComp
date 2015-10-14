@@ -26,6 +26,11 @@ public class Method {
         return type;
     }
 	
+	public ParamList getParamList()
+	{
+		return parameterList;
+	}
+	
 	public void addParameter(Variable v)
 	{
 		parameterList.addElement(v);

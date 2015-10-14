@@ -4,15 +4,16 @@
 */
 package ast;
 
+public class MessageSendToSelfVariable extends MessageSend
+{
 
-public class MessageSendToSelf extends MessageSend {
-	
-	public MessageSendToSelf(KraClass myself, Method message, ExprList params)
+	public MessageSendToSelfVariable(KraClass myself, InstanceVariable myAccessedVar, Method message, ExprList params)
 	{
 		super(message, params);
 		self = myself;
+		accessedVar = myAccessedVar;
 	}
-    
+
 	@Override
     public Type getType() { 
          return super.m.getType();
@@ -23,4 +24,5 @@ public class MessageSendToSelf extends MessageSend {
     }
     
     KraClass self;
+	InstanceVariable accessedVar;
 }

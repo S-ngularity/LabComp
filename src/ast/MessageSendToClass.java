@@ -12,10 +12,12 @@ public class MessageSendToClass extends MessageSend {
 		tClass = targetClass;
 	}
 
+	@Override
     public Type getType() { 
         return super.m.getType();
     }
 
+	@Override
     public void genKra( PW pw, boolean putParenthesis ) {
         
     }

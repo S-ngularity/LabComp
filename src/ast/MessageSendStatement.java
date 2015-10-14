@@ -6,12 +6,12 @@ package ast;
 
 public class MessageSendStatement extends Statement { 
 	
-	public MessageSendStatement(Method message, ExprList args)
+	public MessageSendStatement(Method message, ExprList params)
 	{
-		messageSend = new MessageSendToSelf(null, message, args); // (?)
+		messageSend = new MessageSendToSelf(null, message, params); // (?)
 	}
 
-
+	@Override
    public void genKra( PW pw ) {
       pw.printIdent("");
       // messageSend.genKra(pw);
