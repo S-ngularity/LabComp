@@ -1,46 +1,22 @@
 Relat�rio do Compilador
 
-23 de um total de 136 erros que deveriam ser sinalizados n�o o foram (16%)
+11 de um total de 136 erros que deveriam ser sinalizados n�o o foram (8%)
 0 erros foram sinalizados na linha errada (0%)
-5 erros foram sinalizados em 73 arquivos sem erro (6%)
+1 erros foram sinalizados em 73 arquivos sem erro (1%)
 
 Erros que deveriam ser sinalizados mas n�o foram:
 
-ER-SEM01.KRA, 16, Missing 'return' statement in method 'm' (comp.Compiler.methodDec())
-
 ER-SEM07.KRA, 10, Message send to a non-object receiver (comp.Compiler.factor())
-
-ER-SEM11.KRA, 10, non-boolean expression in  'while' command (comp.Compiler.whileStatement())
-
-ER-SEM12.KRA, 9, operator '+' of 'int' expects an 'int' value (comp.Compiler.simpleExpr())
-
-ER-SEM13.KRA, 11, Command 'read' does not accept 'boolean' variables (comp.Compiler.readStatement())
-
-ER-SEM14.KRA, 12, Command 'write' does not accept 'boolean' expressions (comp.Compiler.writeStatement())
-
-ER-SEM15.KRA, 9, Operator '!' does not accepts 'int' values (comp.Compiler.factor())
-
-ER-SEM26.KRA, 9, 'break' statement found outside a 'while' statement (comp.Compiler.statement()))
 
 ER-SEM34.KRA, 19, Message send 'a.m()' returns a value that is not used (comp.Compiler.statement())
 
-ER-SEM35.KRA, 9, Illegal 'return' statement. Method returns 'void' (comp.Compiler.returnStatement())
-
 ER-SEM36.KRA, 20, Expression expected in the right-hand side of assignment (comp.Compiler.assignExprLocalDec())
-
-ER-SEM39.KRA, 16, Type error: type of the expression returned is not subclass of the method return type (comp.Compiler.returnStatement())
 
 ER-SEM40.KRA, 40, Type error: the type of the real parameter is not subclass of the type of the formal parameter (comp.Compiler.factor())
 
-ER-SEM42.KRA, 14, Type error: type of the left-hand side of the assignment is a basic type and the type of the right-hand side is a class (comp.Compiler.assignExprLocalDec())
-
 ER-SEM44.KRA, 26, Command 'write' does not accept objects (comp.Compiler.writeStatement())
 
-ER-SEM45.KRA, 13, 'int' or 'String' expression expected (comp.Compiler.readStatement())
-
 ER-SEM47.KRA, 24, Method 'm' was not found in superclass 'B' or its superclasses (comp.Compiler.factor())
-
-ER-SEM50.KRA, 17, Command 'break' outside a command 'while' (comp.Compiler.breakStatement())
 
 ER-SEM57.KRA, 21, Incompatible types cannot be compared with '==' because the result will always be 'false' (comp.Compiler.expr())
 
@@ -56,15 +32,7 @@ Um ou mais arquivos de teste tinham erros, mas estes foram sinalizados nos n�m
 ######################################################
 Erros que foram sinalizados mas n�o deveriam ter sido:
 
-OK-GER04.KRA, 22, type 'int' does not support operator '!='
-
-OK-SEM01.KRA, 7, ) expected
-
-OK-SEM03.KRA, 18, type 'char *' does not support operator '=='
-
-OK-SEM04.KRA, 22, type 'int' does not support operator '=='
-
-OK-SEM14.KRA, 27, type 'A' does not support operator '=='
+OK-SEM01.KRA, 7, Variable 'A' does not exist
 
 ######################################################
 Em todos os testes abaixo, o compilador sinalizou o erro na linha correta (quando o teste tinha erros) ou n�o sinalizou o erro (quando o teste N�O tinha erros). Mas � necess�rio conferir se as mensagens emitidas pelo compilador s�o compat�veis com as mensagens de erro sugeridas pelas chamadas aos metaobjetos dos testes. 
@@ -106,6 +74,11 @@ The compiler message was: "Number out of limits"
 The 'ce' message is:      "literal int out of limites"
 
 
+ER-SEM01.KRA
+The compiler message was: "Missing 'return' statement in method 'm'"
+The 'ce' message is:      "Missing 'return' statement in method 'm'"
+
+
 ER-SEM02.KRA
 The compiler message was: "Local variable 'I' has not been declared."
 The 'ce' message is:      "Variable 'I' was not declared"
@@ -117,12 +90,12 @@ The 'ce' message is:      "Variable 'i' is being redeclared"
 
 
 ER-SEM04.KRA
-The compiler message was: "'ast.TypeInt@6bc7c054' cannot be assigned to 'ast.TypeBoolean@232204a1'"
+The compiler message was: "'ast.TypeInt@232204a1' cannot be assigned to 'ast.TypeBoolean@4aa298b7'"
 The 'ce' message is:      "Type error: value of the right-hand side is not subtype of the variable of the left-hand side."
 
 
 ER-SEM05.KRA
-The compiler message was: "'ast.TypeBoolean@232204a1' cannot be assigned to 'ast.TypeInt@6bc7c054'"
+The compiler message was: "'ast.TypeBoolean@4aa298b7' cannot be assigned to 'ast.TypeInt@232204a1'"
 The 'ce' message is:      "'int' cannot be assigned to 'boolean'"
 
 
@@ -132,7 +105,7 @@ The 'ce' message is:      "'operator expected' or 'variable expected at the left
 
 
 ER-SEM08.KRA
-The compiler message was: "type int does not support operation '+'"
+The compiler message was: "type boolean does not support operation '+'"
 The 'ce' message is:      "type boolean does not support operation '+'"
 
 
@@ -141,8 +114,33 @@ The compiler message was: "type 'int' does not support operator '&&'"
 The 'ce' message is:      "type 'int' does not support operator '&&'"
 
 
+ER-SEM11.KRA
+The compiler message was: "non-boolean expression in  'while' command"
+The 'ce' message is:      "non-boolean expression in  'while' command"
+
+
+ER-SEM12.KRA
+The compiler message was: "operator '+' of 'int' expects an 'int' value"
+The 'ce' message is:      "operator '+' of 'int' expects an 'int' value"
+
+
+ER-SEM13.KRA
+The compiler message was: "Command 'read' does not accept 'ast.TypeBoolean@4aa298b7' variables"
+The 'ce' message is:      "Command 'read' does not accept 'boolean' variables"
+
+
+ER-SEM14.KRA
+The compiler message was: "Command 'write' does not accept 'boolean' expressions"
+The 'ce' message is:      "Command 'write' does not accept 'boolean' expressions"
+
+
+ER-SEM15.KRA
+The compiler message was: "Operator '!' does not accepts 'int' values."
+The 'ce' message is:      "Operator '!' does not accepts 'int' values"
+
+
 ER-SEM16.KRA
-The compiler message was: "type 'int' does not support operator '-'"
+The compiler message was: "type 'boolean' does not support operator '-'"
 The 'ce' message is:      "Operator '-' does not accepts 'boolean' expressions"
 
 
@@ -191,6 +189,11 @@ The compiler message was: "Identifier expected"
 The 'ce' message is:      "Identifier expected"
 
 
+ER-SEM26.KRA
+The compiler message was: "'break' statement found outside a 'while' statement"
+The 'ce' message is:      "'break' statement found outside a 'while' statement"
+
+
 ER-SEM27.KRA
 The compiler message was: "Class cannot inherit from itself."
 The 'ce' message is:      "Class 'A' is inheriting from itself"
@@ -221,24 +224,44 @@ The compiler message was: "Method 'm' has already been declared."
 The 'ce' message is:      "Method 'm' is being redeclared"
 
 
+ER-SEM35.KRA
+The compiler message was: "Type error: type of the expression returned is not the declared return type"
+The 'ce' message is:      "Illegal 'return' statement. Method returns 'void'"
+
+
 ER-SEM37.KRA
 The compiler message was: "Method 'set' on object 'a' was not found in its class 'A' or its superclasses."
 The 'ce' message is:      "Method 'set' was not found in class 'A' or its superclasses"
 
 
 ER-SEM38.KRA
-The compiler message was: "'ast.KraClass@4aa298b7' cannot be assigned to 'ast.KraClass@7d4991ad'"
+The compiler message was: "'ast.KraClass@7d4991ad' cannot be assigned to 'ast.KraClass@28d93b30'"
 The 'ce' message is:      "Type error: type of the right-hand side of the assignment is not a subclass of the left-hand side"
 
 
+ER-SEM39.KRA
+The compiler message was: "Type error: type of the expression returned is not the declared return type"
+The 'ce' message is:      "Type error: type of the expression returned is not subclass of the method return type"
+
+
 ER-SEM41.KRA
-The compiler message was: "'ast.KraClass@28d93b30' cannot be assigned to 'ast.TypeInt@6bc7c054'"
+The compiler message was: "'ast.KraClass@1b6d3586' cannot be assigned to 'ast.TypeInt@232204a1'"
 The 'ce' message is:      "Type error: the type of the expression of the right-hand side is a basic type and the type of the variable of the left-hand side is a class"
 
 
+ER-SEM42.KRA
+The compiler message was: "'ast.TypeInt@232204a1' cannot be assigned to 'ast.KraClass@4554617c'"
+The 'ce' message is:      "Type error: type of the left-hand side of the assignment is a basic type and the type of the right-hand side is a class"
+
+
 ER-SEM43.KRA
-The compiler message was: "'ast.TypeInt@6bc7c054' cannot be assigned to 'null'"
+The compiler message was: "'ast.TypeInt@232204a1' cannot be assigned to 'null'"
 The 'ce' message is:      "Type error: 'null' cannot be assigned to a variable of a basic type"
+
+
+ER-SEM45.KRA
+The compiler message was: "Command 'read' does not accept 'ast.KraClass@74a14482' variables"
+The 'ce' message is:      "'int' or 'String' expression expected"
 
 
 ER-SEM46.KRA
@@ -254,6 +277,11 @@ The 'ce' message is:      "Identifier expected"
 ER-SEM49.KRA
 The compiler message was: "Class expected for inheritance."
 The 'ce' message is:      "Class expected"
+
+
+ER-SEM50.KRA
+The compiler message was: "'break' statement found outside a 'while' statement"
+The 'ce' message is:      "Command 'break' outside a command 'while'"
 
 
 ER-SEM51.KRA

@@ -251,7 +251,7 @@ public class Compiler {
 			// MethodDec ::= Type Id “(” [ FormalParamDec ] “)” “{” StatementList “}”
 			// InstVarDec ::= Type IdList “;”
 			Type t = type();
-			
+			currentMethodReturnType = t; // tipo de retorno esperado
 			// nome
 			if ( lexer.token != Symbol.IDENT )
 				signalError.show("Identifier expected");
@@ -414,7 +414,26 @@ public class Compiler {
 		if ( lexer.token != Symbol.LEFTCURBRACKET ) signalError.show("{ expected");
 		lexer.nextToken();
 		
-		statementList();
+		StatementList s = statementList();
+		currentMethod.addStatement(s);
+		
+		// se não é void precisa de return
+		if(currentMethod.getType() != Type.voidType){
+			if(!hasReturn){
+				signalError.show("Missing 'return' statement in method '"+currentMethod.getName()+"'");
+			}
+			else{
+				// ----> VERIFICAÇÃO DO TIPO DE RETORNO AQUI ou embaixo
+			}
+		}
+		else{ // se for void não pode ter return
+			if(hasReturn){
+				//signalError.show();
+				signalError.show("Illegal 'return' statement. Method returns 'void'", true);
+			}
+		}
+		hasReturn = false;
+			
 		
 		if ( lexer.token != Symbol.RIGHTCURBRACKET ) signalError.show("} expected");
 		lexer.nextToken();
@@ -541,6 +560,7 @@ public class Compiler {
 
 // ----> ONDE GUARDAR AS COISAS ABAIXO?
 	
+		// CompStatement ::= "{" { Statement } "}"
 	private Statement compositeStatement() {
 
 		lexer.nextToken(); // pula {
@@ -553,9 +573,8 @@ public class Compiler {
 		return s;
 	}
 
-	private Statement statementList() {
+	private StatementList statementList() {
 		StatementList s = new StatementList();
-		// CompStatement ::= "{" { Statement } "}"
 		// StatementList ::= { Statement }
 		Symbol tk;
 		// statements always begin with an identifier, if, read, write, ...
@@ -662,6 +681,10 @@ public class Compiler {
 			lexer.nextToken();
 			right = expr();
 			
+			if(right.getType() == Type.voidType){
+				signalError.show("Expression expected in the right-hand side of assignment");
+			}
+			
 			// ----> VERIFICAÇÃO SEMÂNTICA DE TIPOS AQUI
 			if( !typeCheck(left.getType(), right.getType()) ){
 				signalError.show("'"+left.getType()+"' cannot be assigned to '"+right.getType()+"'");
@@ -708,6 +731,8 @@ public class Compiler {
 	// WhileStat ::= “while” “(” Expression “)” Statement
 	private Statement whileStatement() {
 		
+		insideWhile++;
+		
 		Expr e;
 		Statement s;
 
@@ -718,10 +743,16 @@ public class Compiler {
 		
 		e = expr();
 		
+		if(e.getType() != Type.booleanType){
+			signalError.show("non-boolean expression in  'while' command");
+		}
+		
 		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
 		lexer.nextToken();
 		
 		s = statement();
+		
+		insideWhile--;
 		
 		return new WhileStmt(e, s);
 	}
@@ -735,10 +766,15 @@ public class Compiler {
 		
 		e = expr();
 		
+		// ----> necessário checar se o tipo de retorno esperado é correto
+		if(e.getType() != currentMethodReturnType){
+			signalError.show("Type error: type of the expression returned is not the declared return type");
+		}
+		
 		if ( lexer.token != Symbol.SEMICOLON )
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken();
-		
+		hasReturn = true;
 		return new ReturnStmt(e);
 	}
 
@@ -765,9 +801,55 @@ public class Compiler {
 				signalError.show("Command 'read' is incomplete.");
 
 			String name = lexer.getStringValue();
-			leftValues.add(name);
+			
 			// ----> CHECAR SE NAME EXISTE COMO INSTVAR DE THIS OU COMO LOCAL VAR
 			// ----> CHECAR ident.staticVar AQUI? EXPR()?
+			// local
+			boolean existName = false;
+			if(symbolTable.getInLocal(name) != null){
+				if(symbolTable.getInLocal(name).getType() != Type.intType &&
+					symbolTable.getInLocal(name).getType() != Type.stringType){
+					
+					signalError.show("Command 'read' does not accept '"+
+						symbolTable.getInLocal(name).getType()
+						  +"' variables");
+				}
+				
+				existName = true;
+			}
+			else{
+				// static
+				if( currentClass.searchStaticInstVar(name) != null){
+					if( currentClass.searchStaticInstVar(name).getType() != Type.intType && 
+						currentClass.searchStaticInstVar(name).getType() != Type.stringType){
+					
+						signalError.show("Command 'read' does not accept '"+
+									  currentClass.searchStaticInstVar(name).getType()
+										  +"' variables");
+					}
+					
+					existName = true;
+				}
+				
+				// instance
+				if( currentClass.searchInstVar(name) != null){
+					if( currentClass.searchInstVar(name).getType() != Type.intType && 
+						currentClass.searchInstVar(name).getType() != Type.stringType){
+					
+						signalError.show("Command 'read' does not accept '"+
+									  currentClass.searchInstVar(name).getType()
+										  +"' variables");
+					}
+				
+					existName = true;
+				}
+			}
+			
+			if(existName)
+				leftValues.add(name);
+			else
+				signalError.show("Variable '"+name+"' does not exist");
+			
 			lexer.nextToken();
 
 			if ( lexer.token == Symbol.COMMA )
@@ -794,7 +876,21 @@ public class Compiler {
 		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
 		lexer.nextToken();
 		
-		ExprList e = exprList();
+		ExprList exprlist = exprList();
+		Iterator<Expr> exprs = exprlist.elements();
+		while(exprs.hasNext()){
+			Expr e = exprs.next();
+			if(e.getType() == Type.booleanType){
+				signalError.show("Command 'write' does not accept 'boolean' expressions");
+			}
+			else if(	e.getType() != Type.booleanType &&
+					e.getType() != Type.intType &&
+					e.getType() != Type.stringType && 
+					e.getType() != Type.voidType){
+				
+				signalError.show("Command 'write' does not accept objects");
+			}
+		}
 		
 		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
 		lexer.nextToken();
@@ -803,7 +899,7 @@ public class Compiler {
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken();
 		
-		return new WriteStmt(e);
+		return new WriteStmt(exprlist);
 	}
 
 	private Statement writelnStatement() {
@@ -826,6 +922,9 @@ public class Compiler {
 	}
 
 	private Statement breakStatement() {
+		if(insideWhile == 0){
+			signalError.show("'break' statement found outside a 'while' statement");
+		}
 		lexer.nextToken(); // pula break
 		
 		if ( lexer.token != Symbol.SEMICOLON )
@@ -873,12 +972,22 @@ public class Compiler {
 
 		Expr left = simpleExpr();
 		Symbol op = lexer.token;
+		
 		if ( op == Symbol.EQ || op == Symbol.NEQ || op == Symbol.LE
 				|| op == Symbol.LT || op == Symbol.GE || op == Symbol.GT ) {
+			
 			lexer.nextToken();
+			
 			Expr right = simpleExpr();
 			// se forem de tipos compatíveis
 			if(typeCheck(left.getType(), right.getType())){
+			/*	if(op == Symbol.EQ || op == Symbol.NEQ){
+					if(left.getType() == Type.nullType){ // precisa saber quando é nullType
+						signalError.show("Incompatible types cannot be compared with '"+
+							op+"' because the result will always be 'false'");
+					}
+				}
+			*/
 				if(op == Symbol.LE || op == Symbol.LT ||
 					op == Symbol.GE || op == Symbol.GT){
 					// apenas int pode ter essas operações
@@ -927,6 +1036,9 @@ public class Compiler {
 					signalError.show("type "+left.getType().getName()+
 							  " does not support operation '"+op+"'");
 				}
+			}
+			else{
+				signalError.show("operator '"+op.toString()+"' of 'int' expects an 'int' value");
 			}
 			left = new CompositeExpr(left, op, right);
 		}
@@ -1043,8 +1155,8 @@ public class Compiler {
 			
 			e = expr();
 			
-			//if(e.getType() != Type.booleanType)
-			//	signalError.show("Operator '!' does not accepts '"+e.getType().getName()+"' values.");
+			if(e.getType() != Type.booleanType)
+				signalError.show("Operator '!' does not accepts '"+e.getType().getName()+"' values.");
 				
 			return new UnaryExpr(e, Symbol.NOT);
 			
@@ -1373,15 +1485,19 @@ public class Compiler {
 	}
 	
 	public boolean typeCheck(Type leftType, Type rightType){
-		
+
 		if(rightType != null){
 			//tipos básicos (boolean, int e string) e iguais
-			if(	(leftType == Type.booleanType ||
+			if(	leftType == Type.booleanType ||
 				leftType == Type.intType ||
-				leftType == Type.stringType) &&
-				leftType == rightType){
-
-				return true;
+				leftType == Type.stringType){
+				// mesmo nome
+				if(leftType.getName().equals(rightType.getName())){
+					return true;
+				}
+				else{
+					return false;
+				}
 			}
 			// direita é subclasse da esquerda (classe é subclasse dela mesma)
 			KraClass rightClass = symbolTable.getInGlobal(rightType.getName());
@@ -1426,4 +1542,9 @@ public class Compiler {
 		if(!m.hasSameSignature(dummyMethod))
 			signalError.show("Incompatible parameters passed to method '"+m.getName()+"'.");
 	}
+	
+	
+	private int insideWhile = 0;
+	private boolean hasReturn = false;
+	private Type currentMethodReturnType = null;
 }
