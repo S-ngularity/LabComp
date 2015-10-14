@@ -55,6 +55,11 @@ public class Compiler {
 			if(symbolTable.getInGlobal("Program") == null)
 				signalError.show("Source code without a class 'Program'.");
 		}
+		catch(NullPointerException e)
+		{
+			e.printStackTrace();
+			//System.out.println(input2);
+		}
 		catch( RuntimeException e) {
 			//e.printStackTrace();
 			// if there was an exception, there is a compilation signalError
@@ -420,7 +425,7 @@ public class Compiler {
 		// se não é void precisa de return
 		if(currentMethod.getType() != Type.voidType){
 			if(!hasReturn){
-				signalError.show("Missing 'return' statement in method '"+currentMethod.getName()+"'");
+				signalError.show("Missing 'return' statement in method '"+currentMethod.getName()+"'.");
 			}
 			else{
 				// ----> VERIFICAÇÃO DO TIPO DE RETORNO AQUI ou embaixo
@@ -442,7 +447,7 @@ public class Compiler {
 		symbolTable.removeLocalIdent();
 		
 		//if(!currentMethod.hasReturn())
-		//	signalError.show("Missing 'return' in method '"+currentMethod.getName()+"'");
+		//	signalError.show("Missing 'return' in method '"+currentMethod.getName()+"'.");
 
 		currentMethod = null;
 	}
@@ -687,7 +692,7 @@ public class Compiler {
 			
 			// ----> VERIFICAÇÃO SEMÂNTICA DE TIPOS AQUI
 			if( !typeCheck(left.getType(), right.getType()) ){
-				signalError.show("'"+left.getType()+"' cannot be assigned to '"+right.getType()+"'");
+				signalError.show("Right type '"+right.getType().getName()+"' cannot be assigned to left type '"+left.getType().getName()+"'.");
 			}
 			
 			if ( lexer.token != Symbol.SEMICOLON )
@@ -942,7 +947,7 @@ public class Compiler {
 	}
 	
 	private ExprList realParameters() {
-		ExprList anExprList = null;
+		ExprList anExprList = new ExprList();
 
 		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
 		lexer.nextToken();
@@ -984,7 +989,7 @@ public class Compiler {
 			/*	if(op == Symbol.EQ || op == Symbol.NEQ){
 					if(left.getType() == Type.nullType){ // precisa saber quando é nullType
 						signalError.show("Incompatible types cannot be compared with '"+
-							op+"' because the result will always be 'false'");
+							op+"' because the result will always be 'false'.");
 					}
 				}
 			*/
@@ -993,7 +998,7 @@ public class Compiler {
 					// apenas int pode ter essas operações
 					if(left.getType() != Type.intType)
 						signalError.show("type '"+left.getType().getName()+
-							  "' does not support operator '"+op+"'");
+							  "' does not support operator '"+op+"'.");
 				}
 				/*if(op == Symbol.EQ || op == Symbol.NEQ){ // EQ e NEQ
 					// boolean, int, string ou classes podem ter essas operações
@@ -1002,7 +1007,7 @@ public class Compiler {
 						left.getType() != Type.stringType){
 						
 						signalError.show("type '"+left.getType().getName()+
-							  "' does not support operator '"+op+"'");
+							  "' does not support operator '"+op+"'.");
 					}
 				}*/
 			}
@@ -1029,12 +1034,12 @@ public class Compiler {
 					  && left.getType() != Type.intType){
 					
 					signalError.show("type "+left.getType().getName()+
-							  " does not support operation '"+op+"'");
+							  " does not support operation '"+op+"'.");
 				}
 				// || com boolean
 				if(op == Symbol.OR && left.getType() != Type.booleanType){
 					signalError.show("type "+left.getType().getName()+
-							  " does not support operation '"+op+"'");
+							  " does not support operation '"+op+"'.");
 				}
 			}
 			else{
@@ -1061,12 +1066,12 @@ public class Compiler {
 					  left.getType() != Type.intType){
 					
 					signalError.show("type '"+left.getType().getName()+
-							  "' does not support operator '"+op+"'");
+							  "' does not support operator '"+op+"'.");
 				}
 				// && com boolean
 				if(op == Symbol.AND && left.getType() != Type.booleanType){
 					signalError.show("type '"+left.getType().getName()+
-							  "' does not support operator '"+op+"'");
+							  "' does not support operator '"+op+"'.");
 				}
 			}
 			
@@ -1084,7 +1089,7 @@ public class Compiler {
 			Expr e = factor();
 			if(e.getType() != Type.intType){
 				signalError.show("type '"+e.getType().getName()+
-							  "' does not support operator '"+op+"'");
+							  "' does not support operator '"+op+"'.");
 			}
 			return new SignalExpr(op, e);
 		}
@@ -1258,19 +1263,18 @@ public class Compiler {
 				return new IdExpr(v);
 			}
 			
-			// Id "."
+			// "."
 			lexer.nextToken(); // coma o "."
 			if ( lexer.token != Symbol.IDENT )
 				signalError.show("Identifier expected");
 
-			// Id "." Id
-			lexer.nextToken();
 			secondId = lexer.getStringValue();
+			lexer.nextToken();
 
 			// Id "." Id "." Id "(" [ ExpressionList ] ")"
 			if ( lexer.token == Symbol.DOT )
 			{
-				lexer.nextToken();
+				lexer.nextToken(); // pula segundo .
 				if ( lexer.token != Symbol.IDENT )
 					signalError.show("Identifier expected");
 				
@@ -1317,10 +1321,14 @@ public class Compiler {
 				
 				exprList = this.realParameters();
 
+				// checa se parâmetros passados são compatíveis
+				assertCompatibleParameters(calledMethod, exprList);
+				return new MessageSendToStaticVariable(firstIdClass, accessedStaticVar, calledMethod, exprList);
 			}
 
 			// Id "." Id "(" [ ExpressionList ] ")"
-			else if ( lexer.token == Symbol.LEFTPAR ) {
+			else if ( lexer.token == Symbol.LEFTPAR )
+			{
 				exprList = this.realParameters();
 				
 				// se firstId é classe, secondId deve ser método estático
@@ -1357,6 +1365,9 @@ public class Compiler {
 				{
 					// pega a classe do objeto
 					KraClass classOfTheObject = symbolTable.getInGlobal(firstIdVar.getType().getName());
+					
+					if(classOfTheObject == null)
+						signalError.show("Method call to a non-object receiver.");
 
 					// procura método público
 					calledNormalMethod = classOfTheObject.searchPublicMethod(secondId);
@@ -1389,10 +1400,9 @@ public class Compiler {
 				}
 			}
 
+			// Id "." Id
 			else
 			{
-				// retorne o objeto da ASA que representa Id "." Id
-				//static var expr
 				KraClass calledClass = symbolTable.getInGlobal(firstId);
 
 				if(calledClass == null)
@@ -1401,9 +1411,9 @@ public class Compiler {
 				InstanceVariable staticInstVar = calledClass.searchStaticInstVar(secondId);
 
 				if(staticInstVar == null)
-					signalError.show("'"+secondId+"' is not a static variable of class '"+firstId+"'");
+					signalError.show("'"+secondId+"' is not a static variable of class '"+firstId+"'.");
 
-				return new StaticVarAccessExpr(calledClass, staticInstVar);
+				return new InstVarAccessExpr(calledClass, staticInstVar);
 			}
 			break;
 			
@@ -1416,49 +1426,119 @@ public class Compiler {
           	 *                 "this" "." Id "(" [ ExpressionList ] ")"  | 
           	 *                 "this" "." Id "." Id "(" [ ExpressionList ] ")"
 			 */
-			lexer.nextToken();
-			if ( lexer.token != Symbol.DOT ) {
-				// only 'this'
-				// retorne um objeto da ASA que representa 'this'
-				// confira se n�o estamos em um m�todo est�tico
-				return null;
+			
+			lexer.nextToken(); // pula "this"
+			
+			if(currentMethod.isStatic())
+				signalError.show("Usage of 'this' inside a static method.");
+			
+			// "this"
+			if ( lexer.token != Symbol.DOT )
+			{
+				return new ThisExpr(currentClass);
 			}
-			else {
-				lexer.nextToken();
+			
+			// "."
+			lexer.nextToken(); // pula .
+			if ( lexer.token != Symbol.IDENT )
+				signalError.show("Identifier expected");
+			
+			secondId = lexer.getStringValue();
+			lexer.nextToken(); // pula Id
+			
+			
+			// "this" "." Id "(" [ ExpressionList ] ")"
+			if ( lexer.token == Symbol.LEFTPAR ) {
+				/*
+				 * Confira se a classe corrente possui um método cujo nome é
+				 * 'ident' e que pode tomar os par�metros de ExpressionList
+				 */
+				exprList = this.realParameters();
+				
+				Method calledNormalMethod = currentClass.searchPrivateMethod(secondId);
+				
+				if(calledNormalMethod == null)
+					calledNormalMethod = currentClass.searchPublicMethod(secondId);
+					
+				// se ainda não achou, procura nas superclasses
+				if(calledNormalMethod == null)
+				{
+					KraClass dummySuperclass = null;
+					calledNormalMethod = currentClass.searchSuperclassMethod(secondId, dummySuperclass);
+				}
+
+				if(calledNormalMethod == null)
+					signalError.show("Method '"+secondId+"' on object 'this' was not found in its class '"+currentClass.getName()+"' or its superclasses.");
+
+				// checa se parâmetros passados são compatíveis
+				assertCompatibleParameters(calledNormalMethod, exprList);
+				
+				return new MessageSendToSelf(currentClass, calledNormalMethod, exprList);
+			}
+			
+			// "this" "." Id "." Id "(" [ ExpressionList ] ")"
+			else if ( lexer.token == Symbol.DOT )
+			{
+				lexer.nextToken(); // pula segundo .
 				if ( lexer.token != Symbol.IDENT )
 					signalError.show("Identifier expected");
-				secondId = lexer.getStringValue();
+				
+				messageName = lexer.getStringValue();
 				lexer.nextToken();
-				// j� analisou "this" "." Id
-				if ( lexer.token == Symbol.LEFTPAR ) {
-					// "this" "." Id "(" [ ExpressionList ] ")"
-					/*
-					 * Confira se a classe corrente possui um m�todo cujo nome �
-					 * 'ident' e que pode tomar os par�metros de ExpressionList
-					 */
-					exprList = this.realParameters();
+				
+				// secondId tem que ser uma variável dessa classe
+				InstanceVariable accessedVar = currentClass.searchInstVar(secondId);
+
+				if(accessedVar == null)
+					signalError.show("Instance variable '"+secondId+"' was not found in class '"+currentClass.getName()+"'.");
+				
+				// classe da variável de instância
+				KraClass secondIdClass = symbolTable.getInGlobal(accessedVar.getType().getName());
+				
+				if(secondIdClass == null)
+					signalError.show("Instance variable '"+secondId+"' is not a class for a method call.");
+				
+				// procura método público
+				Method calledMethod = secondIdClass.searchPublicMethod(messageName);
+
+				// se tiver dentro da classe, procura nos privados
+				if(calledMethod == null && currentClass == secondIdClass)
+					calledMethod = secondIdClass.searchPrivateMethod(messageName);
+				
+				// se ainda não achou, procura nas superclasses
+				if(calledMethod == null)
+				{
+					KraClass dummySuperclass = null;
+					calledMethod = secondIdClass.searchSuperclassMethod(secondId, dummySuperclass);
 				}
-				else if ( lexer.token == Symbol.DOT ) {
-					// "this" "." Id "." Id "(" [ ExpressionList ] ")"
-					lexer.nextToken();
-					if ( lexer.token != Symbol.IDENT )
-						signalError.show("Identifier expected");
-					lexer.nextToken();
-					exprList = this.realParameters();
-				}
-				else {
-					// retorne o objeto da ASA que representa "this" "." Id
-					/*
-					 * confira se a classe corrente realmente possui uma
-					 * vari�vel de inst�ncia 'ident'
-					 */
-					return null;
-				}
+
+				if(calledMethod == null)
+					signalError.show("Method '"+messageName+"' on object '"+secondId+"' was not found in its class '"+secondIdClass.getName()+"' or its superclasses.");
+				
+				exprList = this.realParameters();
+				
+				// checa se parâmetros passados são compatíveis
+				assertCompatibleParameters(calledMethod, exprList);
+
+				return new MessageSendToSelfVariable(currentClass, accessedVar, calledMethod, exprList);
 			}
-			break;
-		default:
-			signalError.show("Expression expected");
+			
+			// "this" "." Id
+			else
+			{
+				InstanceVariable instVar = currentClass.searchInstVar(secondId);
+
+				if(instVar == null)
+					signalError.show("'"+secondId+"' is not a variable of class '"+currentClass.getName()+"'.");
+
+				return new InstVarAccessExpr(currentClass, instVar);
+			}
+		
+			default:
+				signalError.show("Expression expected");
 		}
+		
+		signalError.show("Expression expected");
 		return null;
 	}
 
@@ -1504,6 +1584,9 @@ public class Compiler {
 
 			if(rightClass != null){
 				KraClass leftClass = symbolTable.getInGlobal(leftType.getName());
+				
+				if(leftClass == null)
+					return false;
 
 				if(rightClass.getName().equals(leftClass.getName()) ){ // mesma classe
 					return true;
@@ -1520,7 +1603,7 @@ public class Compiler {
 		}
 		// esquerda é classe e direita é null
 		if(symbolTable.getInGlobal(leftType.getName()) != null &&
-			  rightType == null){
+			  rightType == Type.nullType){
 			return true;
 		}
 		

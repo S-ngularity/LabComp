@@ -243,8 +243,7 @@ public class Comp {
         	   
         	   
 			   // GERAÇÃO DE CÓDIGO
-        	   /*
-               FileOutputStream  outputStream;
+			   /*FileOutputStream  outputStream;
                try {
                   outputStream = new FileOutputStream(outputFileName + ".kra2");
                } catch ( IOException e ) {
@@ -261,8 +260,7 @@ public class Comp {
               if ( printWriter.checkError() ) {
                  outError.println("There was an error in the output");
               }
-              printWriter.close();
-			  */
+              printWriter.close();//*/
            }
 	}
 
