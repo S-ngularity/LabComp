@@ -277,11 +277,12 @@ public class Compiler {
 				instanceVarDec(t, name, isMemberStatic);
 		}
 		
+		if ( lexer.token != Symbol.RIGHTCURBRACKET )
+			signalError.show("'public'/'private' or '}' expected");
+
 		if(currentClass.getName().equals("Program") && currentClass.searchPublicMethod("run") == null)
 			signalError.show("Method 'run' was not found in class 'Program'.");
 		
-		if ( lexer.token != Symbol.RIGHTCURBRACKET )
-			signalError.show("'public'/'private' or '}' expected");
 		lexer.nextToken();
 		
 		currentClass = null;
@@ -460,6 +461,10 @@ public class Compiler {
 
 		Type type = type();
 		if ( lexer.token != Symbol.IDENT ) signalError.show("Identifier expected");
+
+		if(type == Type.voidType)
+			signalError.show("Cannot declaro 'void' variable.");
+
 		Variable v = new Variable(lexer.getStringValue(), type);
 		
 		// checa se já não foi declarado e adiciona nas vars locais
@@ -691,7 +696,38 @@ public class Compiler {
 			
 			// ----> VERIFICAÇÃO SEMÂNTICA DE TIPOS AQUI
 			if( !isTypeConvRtoL(left.getType(), right.getType(), false) ){
-				signalError.show("Right type '"+right.getType().getName()+"' cannot be assigned to left type '"+left.getType().getName()+"'.");
+				signalError.show("Right type '"+right.getType().getName()+"' cannot be "
+								 + "assigned to left type '"+left.getType().getName()+"'.");
+			}
+			
+			if(left instanceof ThisExpr)
+				signalError.show("Can't assign value to 'this'.");
+
+			else if(left instanceof NullExpr)
+				signalError.show("Can't assign value to 'null'.");
+			
+			else if(right.getType() == Type.nullType)
+			{
+				if(left instanceof IdExpr)
+					((IdExpr)left).getVariable().setIsNull(true);
+				
+				else if(left instanceof StaticInstVarAccessExpr)
+					((StaticInstVarAccessExpr)left).getVariable().setIsNull(true);
+				
+				else if(left instanceof SelfInstVarAccessExpr)
+					((SelfInstVarAccessExpr)left).getVariable().setIsNull(true);
+			}
+
+			else if(right.getType() != Type.nullType)
+			{
+				if(left instanceof IdExpr)
+					((IdExpr)left).getVariable().setIsNull(false);
+				
+				else if(left instanceof StaticInstVarAccessExpr)
+					((StaticInstVarAccessExpr)left).getVariable().setIsNull(false);
+				
+				else if(left instanceof SelfInstVarAccessExpr)
+					((SelfInstVarAccessExpr)left).getVariable().setIsNull(false);
 			}
 			
 			if ( lexer.token != Symbol.SEMICOLON )
@@ -975,22 +1011,62 @@ public class Compiler {
 			lexer.nextToken();
 			
 			Expr right = simpleExpr();
+			
 			// se forem de tipos compatíveis
-			if(isTypeConvRtoL(left.getType(), right.getType(), false)){
-			/*	if(op == Symbol.EQ || op == Symbol.NEQ){
-					if(left.getType() == Type.nullType){ // precisa saber quando é nullType
-						signalError.show("Incompatible types cannot be compared with '"+
-							op+"' because the result will always be 'false'.");
+			if(isTypeConvRtoL(left.getType(), right.getType(), false))
+			{
+				if(op == Symbol.EQ || op == Symbol.NEQ)
+				{
+					// se left for int ou bool e tiver aqui dentro, o right é conversível
+					// para left, sendo que o único caso pra isso é o right ser int ou bool também
+					if(left.getType() == Type.intType || left.getType() == Type.booleanType)
+					{
+						// tá tudo certo, int == int ou bool == bool (ou !=)
+					}
+					
+					// STRING
+					//else if()
+					
+					else
+					{
+						boolean leftIsNull = false, rightIsNull = false;
+
+						// left var is null
+						if(left instanceof IdExpr)
+							leftIsNull = ((IdExpr)left).getVariable().isNull();
+
+						else if(left instanceof StaticInstVarAccessExpr)
+							leftIsNull = ((StaticInstVarAccessExpr)left).getVariable().isNull();
+
+						else if(left instanceof SelfInstVarAccessExpr)
+							leftIsNull = ((SelfInstVarAccessExpr)left).getVariable().isNull();
+
+						// right var is null
+						if(right instanceof IdExpr)
+							rightIsNull = ((IdExpr)right).getVariable().isNull();
+
+						else if(right instanceof StaticInstVarAccessExpr)
+							rightIsNull = ((StaticInstVarAccessExpr)right).getVariable().isNull();
+
+						else if(right instanceof SelfInstVarAccessExpr)
+							rightIsNull = ((SelfInstVarAccessExpr)right).getVariable().isNull();
+
+						if(leftIsNull && rightIsNull)
+						{
+							signalError.show("Incompatible types cannot be compared with '"+
+								op+"' because the result will always be 'false'.");
+						}
 					}
 				}
-			*/
+			
 				if(op == Symbol.LE || op == Symbol.LT ||
 					op == Symbol.GE || op == Symbol.GT){
 					// apenas int pode ter essas operações
 					if(left.getType() != Type.intType)
-						signalError.show("type '"+left.getType().getName()+
+						signalError.show("Type '"+left.getType().getName()+
 							  "' does not support operator '"+op+"'.");
 				}
+				
 				/*if(op == Symbol.EQ || op == Symbol.NEQ){ // EQ e NEQ
 					// boolean, int, string ou classes podem ter essas operações
 					if(left.getType() != Type.booleanType && left.getType() != Type.intType &&
@@ -1002,6 +1078,10 @@ public class Compiler {
 					}
 				}*/
 			}
+			
+			else
+				signalError.show("Cannot compare left value's type '"+left.getType().getName()+"' "
+								 + "with right value's type '"+right.getType().getName()+"'.");
 			
 			left = new CompositeExpr(left, op, right);
 		}
@@ -1564,6 +1644,23 @@ public class Compiler {
 			throw new NullPointerException("LEFT TYPE NULL");
 		if(rightType == null)
 			throw new NullPointerException("RIGHT TYPE NULL");
+		
+		// se esquerda é String e direita é null
+		if((leftType == Type.stringType &&
+			rightType == Type.nullType) ||
+		   (rightType == Type.stringType &&
+			leftType == Type.nullType))
+		{
+			return true;
+		}
+		
+		// esquerda é classe e direita é null
+		if((symbolTable.getInGlobal(leftType.getName()) != null &&
+			  rightType == Type.nullType) ||
+		   (symbolTable.getInGlobal(rightType.getName()) != null &&
+			  leftType == Type.nullType)){
+			return true;
+		}
 
 		if(rightType != Type.nullType){
 			//tipos básicos (boolean, int e string) e iguais
@@ -1610,12 +1707,6 @@ public class Compiler {
 			}
 		}
 		
-		// esquerda é classe e direita é null
-		if(symbolTable.getInGlobal(leftType.getName()) != null &&
-			  rightType == Type.nullType){
-			return true;
-		}
-		
 		return false;
 	}
 	
@@ -1642,9 +1733,7 @@ public class Compiler {
 		//return m.hasSameSignature(m2);
 		// tipo de retorno
 		if(!isTypeConvRtoL(m.getType(), m2.getType(), strict))
-		{
 			return false;
-		}
 
 		// mesmo número e tipos dos parâmetros
 		if(m.getParamList().getSize() == m2.getParamList().getSize())

@@ -30,5 +30,10 @@ public class IdExpr extends Expr
 		return v.getType();
 	}
 	
+	public Variable getVariable()
+	{
+		return v;
+	}
+	
 	private Variable v;
 }

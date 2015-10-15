@@ -25,6 +25,11 @@ public class SelfInstVarAccessExpr extends Expr
 		return staticVar.getType();
 	}
 	
+	public Variable getVariable()
+	{
+		return staticVar;
+	}
+	
 	KraClass cClass;
 	InstanceVariable staticVar;
 }

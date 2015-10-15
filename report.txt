@@ -1,34 +1,16 @@
 Relat�rio do Compilador
 
-2 de um total de 133 erros que deveriam ser sinalizados n�o o foram (1%)
-3 erros foram sinalizados na linha errada (2%)
-1 erros foram sinalizados em 76 arquivos sem erro (1%)
-
-Erros que deveriam ser sinalizados mas n�o foram:
-
-ER-SEM57.KRA, 21, Incompatible types cannot be compared with '==' because the result will always be 'false' (comp.Compiler.expr())
-
-ER-SEM58.KRA, 21, Incompatible types cannot be compared with '!=' because the result will always be 'false' (comp.Compiler.expr())
-
-######################################################
-Erros que foram sinalizados na linha errada:
-
-ER-SEM09.KRA
-    correto:    12, type 'int' does not support operator '&&' (comp.Compiler.term())
-    sinalizado: 10, type 'int' does not support operator '&&'.
-
-ER-SEM15.KRA
-    correto:    9, Operator '!' does not accepts 'int' values (comp.Compiler.factor())
-    sinalizado: 7, Type 'Int' was not found.
-
-ER-SEM23.KRA
-    correto:    7, Identifier expected (comp.Compiler.localDec())
-    sinalizado: 8, Identifier expected
-
+0 de um total de 136 erros que deveriam ser sinalizados n�o o foram (0%)
+0 erros foram sinalizados na linha errada (0%)
+2 erros foram sinalizados em 73 arquivos sem erro (2%)
+Todos os erros que deveriam ter sido sinalizados o foram
+Um ou mais arquivos de teste tinham erros, mas estes foram sinalizados nos n�meros de linhas corretos
 ######################################################
 Erros que foram sinalizados mas n�o deveriam ter sido:
 
 OK-SEM01.KRA, 7, Command 'read' does not accept variables of type 'A', only 'int' and 'String'.
+
+OK-SEM14.KRA, 27, Incompatible types cannot be compared with '==' because the result will always be 'false'.
 
 ######################################################
 Em todos os testes abaixo, o compilador sinalizou o erro na linha correta (quando o teste tinha erros) ou n�o sinalizou o erro (quando o teste N�O tinha erros). Mas � necess�rio conferir se as mensagens emitidas pelo compilador s�o compat�veis com as mensagens de erro sugeridas pelas chamadas aos metaobjetos dos testes. 
@@ -110,6 +92,11 @@ The compiler message was: "type boolean does not support operation '+'."
 The 'ce' message is:      "type boolean does not support operation '+'"
 
 
+ER-SEM09.KRA
+The compiler message was: "type 'int' does not support operator '&&'."
+The 'ce' message is:      "type 'int' does not support operator '&&'"
+
+
 ER-SEM11.KRA
 The compiler message was: "Non-boolean expression in  'while' command."
 The 'ce' message is:      "non-boolean expression in  'while' command"
@@ -128,6 +115,16 @@ The 'ce' message is:      "Command 'read' does not accept 'boolean' variables"
 ER-SEM14.KRA
 The compiler message was: "Command 'write' does not accept 'boolean' expressions"
 The 'ce' message is:      "Command 'write' does not accept 'boolean' expressions"
+
+
+ER-SEM15.KRA
+The compiler message was: "Operator '!' does not accepts 'int' values."
+The 'ce' message is:      "Operator '!' does not accepts 'int' values"
+
+
+ER-SEM16.KRA
+The compiler message was: "type 'boolean' does not support operator '-'."
+The 'ce' message is:      "Operator '-' does not accepts 'boolean' expressions"
 
 
 ER-SEM17.KRA
@@ -151,6 +148,16 @@ The 'ce' message is:      "Identifier expected"
 
 
 ER-SEM21.KRA
+The compiler message was: "Identifier expected"
+The 'ce' message is:      "Identifier expected"
+
+
+ER-SEM22.KRA
+The compiler message was: "Identifier expected"
+The 'ce' message is:      "Identifier expected"
+
+
+ER-SEM23.KRA
 The compiler message was: "Identifier expected"
 The 'ce' message is:      "Identifier expected"
 
@@ -255,6 +262,11 @@ The compiler message was: "Command 'write' does not accept objects"
 The 'ce' message is:      "Command 'write' does not accept objects"
 
 
+ER-SEM45.KRA
+The compiler message was: "Command 'read' does not accept variables of type 'A', only 'int' and 'String'."
+The 'ce' message is:      "'int' or 'String' expression expected"
+
+
 ER-SEM46.KRA
 The compiler message was: "'super' used in class 'Program' that does not have a superclass."
 The 'ce' message is:      "'super' used in class 'Program' that does not have a superclass"
@@ -283,6 +295,16 @@ The 'ce' message is:      "Command 'break' outside a command 'while'"
 ER-SEM51.KRA
 The compiler message was: "Method 'put' has a different signature from overriden method in superclass 'A'."
 The 'ce' message is:      "Method 'put' is being redefined in subclass 'B' with a signature different from the method of superclass 'A'"
+
+
+ER-SEM57.KRA
+The compiler message was: "Cannot compare left value's type 'A' with right value's type 'B'."
+The 'ce' message is:      "Incompatible types cannot be compared with '==' because the result will always be 'false'"
+
+
+ER-SEM58.KRA
+The compiler message was: "Cannot compare left value's type 'A' with right value's type 'B'."
+The 'ce' message is:      "Incompatible types cannot be compared with '!=' because the result will always be 'false'"
 
 
 ER-SEM59.KRA
@@ -571,7 +593,7 @@ The 'ce' message is:      "Unknown character '#'"
 
 
 ER-SIN31.KRA
-The compiler message was: "Method 'run' was not found in class 'Program'."
+The compiler message was: "'public'/'private' or '}' expected"
 The 'ce' message is:      "'public', 'private', or '}' expected"
 
 
@@ -626,12 +648,12 @@ The 'ce' message is:      "Identifier expected"
 
 
 ER-SIN43.KRA
-The compiler message was: "Method 'run' was not found in class 'Program'."
+The compiler message was: "'public'/'private' or '}' expected"
 The 'ce' message is:      "'public', 'private', or '}' expected"
 
 
 ER-SIN44.KRA
-The compiler message was: "Method 'run' was not found in class 'Program'."
+The compiler message was: "'public'/'private' or '}' expected"
 The 'ce' message is:      "'public', 'private', or '}' expected"
 
 
@@ -666,7 +688,7 @@ The 'ce' message is:      "Identifier expected"
 
 
 ER-SIN57.KRA
-The compiler message was: "Method 'run' was not found in class 'Program'."
+The compiler message was: "'public'/'private' or '}' expected"
 The 'ce' message is:      "'public', 'private' or '}' expected"
 
 
