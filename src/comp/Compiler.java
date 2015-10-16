@@ -49,7 +49,7 @@ public class Compiler {
 			while ( lexer.token == Symbol.CLASS || lexer.token == Symbol.FINAL )
 				kraClassList.add(classDec());
 			if ( lexer.token != Symbol.EOF ) {
-				signalError.show("End of file expected");
+				signalError.show("'class' or End of File expected.");
 			}
 				
 			if(symbolTable.getInGlobal("Program") == null)
@@ -70,7 +70,7 @@ public class Compiler {
 
 	/**  parses a metaobject call as <code>{@literal @}ce(...)</code> in <br>
      * <code>
-     * @ce(5, "'class' expected") <br>
+     * @ce(5, "'class' expected.") <br>
      * clas Program <br>
      *     public void run() { } <br>
      * end <br>
@@ -108,23 +108,22 @@ public class Compiler {
 					break;
 			}
 			if ( lexer.token != Symbol.RIGHTPAR ) 
-				signalError.show("')' expected after metaobject call with parameters");
-			else
-				lexer.nextToken();
+				signalError.show("')' expected after metaobject call with parameters.");
+			lexer.nextToken();
 		}
 		if ( name.equals("nce") ) {
 			if ( metaobjectParamList.size() != 0 )
-				signalError.show("Metaobject 'nce' does not take parameters");
+				signalError.show("Metaobject 'nce' does not take parameters.");
 		}
 		else if ( name.equals("ce") ) {
 			if ( metaobjectParamList.size() != 3 && metaobjectParamList.size() != 4 )
-				signalError.show("Metaobject 'ce' take three or four parameters");
+				signalError.show("Metaobject 'ce' take three or four parameters.");
 			if ( !( metaobjectParamList.get(0) instanceof Integer)  )
-				signalError.show("The first parameter of metaobject 'ce' should be an integer number");
+				signalError.show("The first parameter of metaobject 'ce' should be an integer number.");
 			if ( !( metaobjectParamList.get(1) instanceof String) ||  !( metaobjectParamList.get(2) instanceof String) )
-				signalError.show("The second and third parameters of metaobject 'ce' should be literal strings");
+				signalError.show("The second and third parameters of metaobject 'ce' should be literal strings.");
 			if ( metaobjectParamList.size() >= 4 && !( metaobjectParamList.get(3) instanceof String) )  
-				signalError.show("The fourth parameter of metaobject 'ce' should be a literal string");
+				signalError.show("The fourth parameter of metaobject 'ce' should be a literal string.");
 			
 		}
 			
@@ -154,7 +153,7 @@ public class Compiler {
 			lexer.nextToken();
 		}
 		
-		if ( lexer.token != Symbol.CLASS ) signalError.show("'class' expected");
+		if ( lexer.token != Symbol.CLASS ) signalError.show("'class' expected.");
 
 		// nome da classe
 		lexer.nextToken();
@@ -207,7 +206,7 @@ public class Compiler {
 		// MemberList ::= { Qualifier Member }
 		// {
 		if ( lexer.token != Symbol.LEFTCURBRACKET )
-			signalError.show("{ expected", true);
+			signalError.show("'{' expected.", true);
 		lexer.nextToken();
 
 		// Qualifier ::= [ “final” ] [ “static” ] ( “private” | “public”)
@@ -255,11 +254,11 @@ public class Compiler {
 			// Member ::= InstVarDec | MethodDec
 			// MethodDec ::= Type Id “(” [ FormalParamDec ] “)” “{” StatementList “}”
 			// InstVarDec ::= Type IdList “;”
-			Type t = type();
+			Type t = type(true);
 			currentMethodReturnType = t; // tipo de retorno esperado
 			// nome
 			if ( lexer.token != Symbol.IDENT )
-				signalError.show("Identifier expected");
+				signalError.show(SignalError.ident_expected);
 			String name = lexer.getStringValue();
 			
 			// se (, é método
@@ -278,7 +277,7 @@ public class Compiler {
 		}
 		
 		if ( lexer.token != Symbol.RIGHTCURBRACKET )
-			signalError.show("'public'/'private' or '}' expected");
+			signalError.show("'public'/'private' or '}' expected.");
 
 		if(currentClass.getName().equals("Program") && currentClass.searchPublicMethod("run") == null)
 			signalError.show("Method 'run' was not found in class 'Program'.");
@@ -299,7 +298,7 @@ public class Compiler {
 		while (lexer.token == Symbol.COMMA) {
 			lexer.nextToken();
 			if ( lexer.token != Symbol.IDENT )
-				signalError.show("Identifier expected");
+				signalError.show(SignalError.ident_expected);
 			String variableName = lexer.getStringValue();
 			
 			// checa se já foi declarada e adiciona a classe
@@ -377,7 +376,7 @@ public class Compiler {
 		// adiciona lista de parâmetros ao método
 		lexer.nextToken(); // pula (
 		if ( lexer.token != Symbol.RIGHTPAR ) formalParamDec();
-		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
+		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show("')' expected.");
 		lexer.nextToken();
 		
 		// checa se redefine método final (não-estático)
@@ -419,89 +418,31 @@ public class Compiler {
 		}
 
 		// corpo do método
-		if ( lexer.token != Symbol.LEFTCURBRACKET ) signalError.show("{ expected");
+		if ( lexer.token != Symbol.LEFTCURBRACKET )
+			signalError.show("'{' expected.");
 		lexer.nextToken();
 		
-		StatementList s = statementList();
-		currentMethod.addStatement(s);
+		StatementList stmtList = statementList();
+		currentMethod.addStatement(stmtList);
 		
 		// se não é void precisa de return
-		if(currentMethod.getType() != Type.voidType){
-			if(!hasReturn){
+		if(currentMethod.getType() != Type.voidType && 
+			!stmtList.hasGrantedReturn())
+		{
 				signalError.show("Missing 'return' statement in method '"+currentMethod.getName()+"'.");
-			}
-			else{
-				// ----> VERIFICAÇÃO DO TIPO DE RETORNO AQUI ou embaixo
-			}
 		}
-		else{ // se for void não pode ter return
-			if(hasReturn){
-				signalError.show("Illegal 'return' statement. Method returns 'void'.", true);
-			}
-		}
-		hasReturn = false;
 			
 		
-		if ( lexer.token != Symbol.RIGHTCURBRACKET ) signalError.show("} expected");
+		if ( lexer.token != Symbol.RIGHTCURBRACKET ) signalError.show("'}' expected.");
 		lexer.nextToken();
 		
 		// variáveis locais saem do escopo
 		symbolTable.removeLocalIdent();
 		
-		//if(!currentMethod.hasReturn())
+		//if(!currentMethod.hasGrantedReturn())
 		//	signalError.show("Missing 'return' in method '"+currentMethod.getName()+"'.");
 
 		currentMethod = null;
-	}
-
-	private Statement localDec() {
-		// LocalDec ::= Type IdList ";"
-		
-		StatementList stmtList = new StatementList();
-
-		Type type = type();
-		if ( lexer.token != Symbol.IDENT ) signalError.show("Identifier expected");
-
-		if(type == Type.voidType)
-			signalError.show("Cannot declaro 'void' variable.");
-
-		Variable v = new Variable(lexer.getStringValue(), type);
-		
-		// checa se já não foi declarado e adiciona nas vars locais
-		if(symbolTable.getInLocal(v.getName()) != null){
-			signalError.show("Local variable '"+v.getName()+"' has already been declared.");
-		}
-		else{
-			symbolTable.putInLocal(v.getName(), v);
-			stmtList.addElement(new LocalDecStmt(v));
-		}
-		
-		lexer.nextToken(); // pula IDENT
-
-		while (lexer.token == Symbol.COMMA) {
-			lexer.nextToken();
-
-			if ( lexer.token != Symbol.IDENT )
-				signalError.show("Identifier expected");
-			Variable var = new Variable(lexer.getStringValue(), type);
-
-			// checa se já não foi declarado e adiciona nas vars locais
-			if(symbolTable.getInLocal(var.getName()) != null){
-				signalError.show("Local variable '"+var.getName()+"' has already been declared.");
-			}
-			else{
-				symbolTable.putInLocal(var.getName(), var);
-				stmtList.addElement(new LocalDecStmt(var));
-			}
-
-			lexer.nextToken(); // pula IDENT
-		}
-		
-		if ( lexer.token != Symbol.SEMICOLON )
-			signalError.show(SignalError.semicolon_expected);
-		lexer.nextToken(); // pula ;
-		
-		return stmtList;
 	}
 
 	private void formalParamDec() {
@@ -517,9 +458,10 @@ public class Compiler {
 	private void paramDec() {
 		// ParamDec ::= Type Id
 
-		Type t = type();
+		Type t = type(false);
 		
-		if ( lexer.token != Symbol.IDENT ) signalError.show("Identifier expected");
+		if ( lexer.token != Symbol.IDENT )
+			signalError.show(SignalError.ident_expected);
 		
 		Variable v = new Variable(lexer.getStringValue(), t);
 		
@@ -534,12 +476,15 @@ public class Compiler {
 		lexer.nextToken();
 	}
 
-	private Type type() {
+	private Type type(boolean allowVoid) {
 		// Type ::= BasicType | Id
 		Type result;
 
 		switch (lexer.token) {
 		case VOID:
+			if(!allowVoid)
+				signalError.show("'"+Type.voidType.getName()+"' type is not allowed.");
+			
 			result = Type.voidType;
 			break;
 		case INT:
@@ -554,13 +499,13 @@ public class Compiler {
 		case IDENT:
 			// retorna classe como o tipo, se tiver sido declarada
 			if(!isType(lexer.getStringValue())){
-				signalError.show("Class '"+lexer.getStringValue()+"' has not been declared");
+				signalError.show("Class '"+lexer.getStringValue()+"' has not been declared.");
 			}
 
 			result = symbolTable.getInGlobal(lexer.getStringValue());
 			break;
 		default:
-			signalError.show("Type expected");
+			signalError.show("Type expected.");
 			result = Type.undefinedType;
 		}
 		lexer.nextToken();
@@ -569,28 +514,48 @@ public class Compiler {
 
 // ----> ONDE GUARDAR AS COISAS ABAIXO?
 	
-		// CompStatement ::= "{" { Statement } "}"
-	private Statement compositeStatement() {
-
+	// CompStatement ::= "{" { Statement } "}"
+	private Statement compositeStatement()
+	{
+		if ( lexer.token != Symbol.LEFTCURBRACKET )
+			signalError.show("'{' expected.");
 		lexer.nextToken(); // pula {
+		
 		Statement s = statementList();
+		
 		if ( lexer.token != Symbol.RIGHTCURBRACKET )
-			signalError.show("} expected");
-		else
-			lexer.nextToken();
+			signalError.show("'}' expected.");
+		lexer.nextToken();
 		
 		return s;
 	}
 
+	// StatementList ::= { Statement }
 	private StatementList statementList() {
-		StatementList s = new StatementList();
-		// StatementList ::= { Statement }
+		StatementList sList = new StatementList();
 		Symbol tk;
-		// statements always begin with an identifier, if, read, write, ...
-		while ((tk = lexer.token) != Symbol.RIGHTCURBRACKET && tk != Symbol.ELSE)
-			s.addElement(statement());
 		
-		return s;
+		boolean hadBreakStmt = false;
+		
+		// statements always begin with an identifier, if, read, write, ...
+		while ((tk = lexer.token) != Symbol.RIGHTCURBRACKET)
+		{
+			Statement singleStmt = statement();
+			
+			// se não teve nenhum return garantido antes, inclui próximos statements
+			if(!sList.hasGrantedReturn())
+				sList.addElement(singleStmt);
+
+			if(singleStmt.hasPossibleBreak())
+				sList.checkHasPossibleBreak();			
+			
+			// se statements anteriores nunca tiveram a possibilidade de dar break
+			// e statement atual com certeza dá return, esse statement com certeza dá return
+			if(!sList.hasPossibleBreak() && singleStmt.hasGrantedReturn())
+				sList.checkHasGrantedReturn();
+		}
+		
+		return sList;
 	}
 
 	private Statement statement() {
@@ -609,6 +574,8 @@ public class Compiler {
 		case INT:
 		case BOOLEAN:
 		case STRING:
+		case NEW: // para permitir criação de variáveis flutuantes (para singletons, por exemplo)
+		case VOID: // para dar erro de tipo proibido para variáveis
 			s = assignExprLocalDec();
 			break;
 		case RETURN:
@@ -639,8 +606,9 @@ public class Compiler {
 			s = compositeStatement();
 			break;
 		default:
-			signalError.show("Statement expected");
+			signalError.show("Statement expected.");
 		}
+		
 		return s;
 	}
 
@@ -657,11 +625,13 @@ public class Compiler {
 		
 		Statement s;
 
-		if ( lexer.token == Symbol.INT || lexer.token == Symbol.BOOLEAN
-				|| lexer.token == Symbol.STRING ||
-				// token � uma classe declarada textualmente antes desta
-				// instru��o
-				(lexer.token == Symbol.IDENT && isType(lexer.getStringValue()) && lexer.isNextTokenIdent()) ) {
+		if (lexer.token == Symbol.INT || 
+			lexer.token == Symbol.BOOLEAN || 
+			lexer.token == Symbol.STRING || 
+			lexer.token == Symbol.VOID || 
+			// token é uma classe declarada textualmente antes desta instrução
+			(lexer.token == Symbol.IDENT && isType(lexer.getStringValue()) && lexer.isNextTokenIdent()) )
+		{
 			/*
 			 * uma declara��o de vari�vel. 'lexer.token' � o tipo da vari�vel
 			 * 
@@ -691,7 +661,7 @@ public class Compiler {
 			right = expr();
 			
 			if(right.getType() == Type.voidType){
-				signalError.show("Expression expected in the right-hand side of assignment");
+				signalError.show("Expression expected in the right-hand side of assignment.");
 			}
 			
 			// ----> VERIFICAÇÃO SEMÂNTICA DE TIPOS AQUI
@@ -705,35 +675,11 @@ public class Compiler {
 
 			else if(left instanceof NullExpr)
 				signalError.show("Can't assign value to 'null'.");
-			
-			else if(right.getType() == Type.nullType)
-			{
-				if(left instanceof IdExpr)
-					((IdExpr)left).getVariable().setIsNull(true);
-				
-				else if(left instanceof StaticInstVarAccessExpr)
-					((StaticInstVarAccessExpr)left).getVariable().setIsNull(true);
-				
-				else if(left instanceof SelfInstVarAccessExpr)
-					((SelfInstVarAccessExpr)left).getVariable().setIsNull(true);
-			}
 
-			else if(right.getType() != Type.nullType)
-			{
-				if(left instanceof IdExpr)
-					((IdExpr)left).getVariable().setIsNull(false);
-				
-				else if(left instanceof StaticInstVarAccessExpr)
-					((StaticInstVarAccessExpr)left).getVariable().setIsNull(false);
-				
-				else if(left instanceof SelfInstVarAccessExpr)
-					((SelfInstVarAccessExpr)left).getVariable().setIsNull(false);
-			}
 			
 			if ( lexer.token != Symbol.SEMICOLON )
-				signalError.show("';' expected", true);
-			else
-				lexer.nextToken();
+				signalError.show("';' expected.", true);
+			lexer.nextToken();
 			
 			return new AssignStmt(left, right);
 		}
@@ -743,14 +689,68 @@ public class Compiler {
 			MessageSend msgSend = (MessageSend) left;
 			
 			if(msgSend.getType() != Type.voidType)
-				signalError.show("Message send returns value that is not used.");
+				signalError.show("Method call returns a value that is not used.");
 			
 			lexer.nextToken(); // pula ; após chamada de método isolada
 			
 			return new MessageSendStatement(msgSend);
 		}
 		
+		// se não é uma chamada de método, então é só uma expressão sozinha na linha
+		else
+			signalError.show("An expression is not a valid statement.");
+		
 		throw new NullPointerException();
+	}
+	
+	private Statement localDec()
+	{
+		// LocalDec ::= Type IdList ";"
+		
+		StatementList stmtList = new StatementList();
+
+		Type type = type(false);
+		
+		if ( lexer.token != Symbol.IDENT )
+			signalError.show(SignalError.ident_expected);
+
+		Variable v = new Variable(lexer.getStringValue(), type);
+		
+		// checa se já não foi declarado e adiciona nas vars locais
+		if(symbolTable.getInLocal(v.getName()) != null){
+			signalError.show("Local variable '"+v.getName()+"' has already been declared.");
+		}
+		else{
+			symbolTable.putInLocal(v.getName(), v);
+			stmtList.addElement(new LocalDecStmt(v));
+		}
+		
+		lexer.nextToken(); // pula IDENT
+
+		while (lexer.token == Symbol.COMMA) {
+			lexer.nextToken();
+
+			if ( lexer.token != Symbol.IDENT )
+				signalError.show(SignalError.ident_expected);
+			Variable var = new Variable(lexer.getStringValue(), type);
+
+			// checa se já não foi declarado e adiciona nas vars locais
+			if(symbolTable.getInLocal(var.getName()) != null){
+				signalError.show("Local variable '"+var.getName()+"' has already been declared.");
+			}
+			else{
+				symbolTable.putInLocal(var.getName(), var);
+				stmtList.addElement(new LocalDecStmt(var));
+			}
+
+			lexer.nextToken(); // pula IDENT
+		}
+		
+		if ( lexer.token != Symbol.SEMICOLON )
+			signalError.show(SignalError.semicolon_expected);
+		lexer.nextToken(); // pula ;
+		
+		return stmtList;
 	}
 	
 	// IfStat ::= “if” “(” Expression “)” Statement [ “else” Statement ]
@@ -761,13 +761,18 @@ public class Compiler {
 
 		lexer.nextToken(); // pula if
 		
-		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
+		if ( lexer.token != Symbol.LEFTPAR )
+			signalError.show("'(' expected.");
 		lexer.nextToken();
 		
 		e = expr();
 		
-		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
+		if ( lexer.token != Symbol.RIGHTPAR )
+			signalError.show("')' expected.");
 		lexer.nextToken();
+		
+		if(e.getType() != Type.booleanType)
+			signalError.show("Condition for 'if' statement must be of type '"+Type.booleanType.getName()+"'.");
 
 		ifStmt = statement();
 		
@@ -779,7 +784,24 @@ public class Compiler {
 			elseStmt = null;
 		}
 		
-		return new IfStmt(e, ifStmt, elseStmt);
+		IfStmt rStmtValue = new IfStmt(e, ifStmt, elseStmt);
+		
+		// se o if pode dar um break e/ou tem else e o else pode dar um break, este ifstmt pode dar um break
+		if(ifStmt.hasPossibleBreak() || (elseStmt != null && elseStmt.hasPossibleBreak()))
+			rStmtValue.checkHasPossibleBreak();
+
+		// se tem else (pra segundar parte)
+		// e se o if nunca da break e o else também nunca da break
+		// e tanto o if quanto o else existem e sempre dão return, esse if sempre dá return
+		if(elseStmt != null && 
+		   !ifStmt.hasPossibleBreak() && !elseStmt.hasPossibleBreak() &&
+			ifStmt.hasGrantedReturn() && elseStmt.hasGrantedReturn())
+		{
+			rStmtValue.checkHasGrantedReturn();
+		}
+		
+		
+		return rStmtValue;
 	}
 
 	// WhileStat ::= “while” “(” Expression “)” Statement
@@ -792,46 +814,54 @@ public class Compiler {
 
 		lexer.nextToken(); // pula while
 		
-		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
+		if ( lexer.token != Symbol.LEFTPAR )
+			signalError.show("'(' expected.");
 		lexer.nextToken();
 		
 		e = expr();
 		
+		
 		if(e.getType() != Type.booleanType){
-			signalError.show("Non-boolean expression in  'while' command.");
+			signalError.show("Condition for 'while' statement must be of type '"+Type.booleanType.getName()+"'.");
 		}
 		
-		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
+		if ( lexer.token != Symbol.RIGHTPAR )
+			signalError.show("')' expected.");
 		lexer.nextToken();
 		
 		s = statement();
 		
 		insideWhile--;
 		
-		return new WhileStmt(e, s);
+		WhileStmt wStmtValue = new WhileStmt(e, s);
+		
+		// esse while statement é garantido um return caso ele seja true
+		if(e == LiteralBoolean.True && s.hasGrantedReturn())
+			wStmtValue.checkHasGrantedReturn();
+
+		return wStmtValue;
 	}
 
 	// ReturnStat ::= "return" Expression ";"
 	private Statement returnStatement() {
 		
-		Expr e;
-
 		lexer.nextToken(); // pula return
 		
-		e = expr();
+		Expr e = expr();
 		
 		// ----> necessário checar se o tipo de retorno esperado é correto
 		if(!isTypeConvRtoL(currentMethodReturnType, e.getType(), false)){
 			if(currentMethodReturnType == Type.voidType)
-				signalError.show("Illegal 'return' statement. Method returns 'void'.");
+				signalError.show("Illegal 'return' statement. Method returns '"+Type.voidType.getName()+"'.");
 			else
-				signalError.show("Type error: type of the expression returned is not the declared return type");
+				signalError.show("Type error: type '"+e.getType().getName()+"' of the expression "
+								 + "returned is not of the declared return type '"+currentMethodReturnType.getName()+"'.");
 		}
 		
 		if ( lexer.token != Symbol.SEMICOLON )
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken();
-		hasReturn = true;
+		
 		return new ReturnStmt(e);
 	}
 
@@ -842,7 +872,8 @@ public class Compiler {
 		
 		lexer.nextToken(); // pula read
 		
-		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
+		if ( lexer.token != Symbol.LEFTPAR )
+			signalError.show("'(' expected.");
 		lexer.nextToken();
 		
 		while (true)
@@ -857,7 +888,9 @@ public class Compiler {
 				if(e.getType() != Type.intType &&
 					e.getType() != Type.stringType)
 				{
-					signalError.show("Command 'read' does not accept variables of type '"+e.getType().getName()+"', only 'int' and 'String'.");
+					signalError.show("Command 'read' does not accept variables of "
+									 + "type '"+e.getType().getName()+"',"
+									 + " only '"+Type.intType.getName()+"' and '"+Type.stringType.getName()+"'.");
 					break;
 				}
 
@@ -876,7 +909,7 @@ public class Compiler {
 			}
 		}
 
-		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
+		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show("')' expected.");
 		lexer.nextToken();
 		
 		if ( lexer.token != Symbol.SEMICOLON )
@@ -891,26 +924,22 @@ public class Compiler {
 
 		lexer.nextToken(); // pula write
 		
-		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
+		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("'(' expected.");
 		lexer.nextToken();
 		
 		ExprList exprlist = exprList();
 		Iterator<Expr> exprs = exprlist.elements();
 		while(exprs.hasNext()){
 			Expr e = exprs.next();
-			if(e.getType() == Type.booleanType){
-				signalError.show("Command 'write' does not accept 'boolean' expressions");
-			}
-			else if(	e.getType() != Type.booleanType &&
-					e.getType() != Type.intType &&
-					e.getType() != Type.stringType && 
-					e.getType() != Type.voidType){
-				
-				signalError.show("Command 'write' does not accept objects");
-			}
+			
+			if(e.getType() != Type.intType && e.getType() != Type.stringType)
+				signalError.show("Command 'write' does not accept variables of "
+									 + "type '"+e.getType().getName()+"',"
+									 + " only '"+Type.intType.getName()+"' and '"+Type.stringType.getName()+"'.");
 		}
 		
-		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
+		if ( lexer.token != Symbol.RIGHTPAR )
+			signalError.show("')' expected.");
 		lexer.nextToken();
 		
 		if ( lexer.token != Symbol.SEMICOLON )
@@ -924,26 +953,23 @@ public class Compiler {
 
 		lexer.nextToken(); // pula writeln
 		
-		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
+		if ( lexer.token != Symbol.LEFTPAR )
+			signalError.show("'(' expected.");
 		lexer.nextToken();
 		
 		ExprList exprlist = exprList();
 		Iterator<Expr> exprs = exprlist.elements();
 		while(exprs.hasNext()){
 			Expr e = exprs.next();
-			if(e.getType() == Type.booleanType){
-				signalError.show("Command 'writeln' does not accept 'boolean' expressions");
-			}
-			else if(	e.getType() != Type.booleanType &&
-					e.getType() != Type.intType &&
-					e.getType() != Type.stringType && 
-					e.getType() != Type.voidType){
-				
-				signalError.show("Command 'writeln' does not accept objects");
-			}
+			
+			if(e.getType() != Type.intType && e.getType() != Type.stringType)
+				signalError.show("Command 'writeln' does not accept variables of "
+									 + "type '"+e.getType().getName()+"',"
+									 + " only '"+Type.intType.getName()+"' and '"+Type.stringType.getName()+"'.");
 		}
 		
-		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
+		if ( lexer.token != Symbol.RIGHTPAR )
+			signalError.show("')' expected.");
 		lexer.nextToken();
 		
 		if ( lexer.token != Symbol.SEMICOLON )
@@ -954,9 +980,11 @@ public class Compiler {
 	}
 
 	private Statement breakStatement() {
-		if(insideWhile == 0){
-			signalError.show("'break' statement found outside a 'while' statement");
-		}
+		if(insideWhile == 0)
+			signalError.show("'break' statement found outside a 'while' statement.");
+		else if (insideWhile < 0)
+			signalError.show("Internal compiler error: \"insideWhile with value '"+insideWhile+"'\".");
+		
 		lexer.nextToken(); // pula break
 		
 		if ( lexer.token != Symbol.SEMICOLON )
@@ -976,11 +1004,16 @@ public class Compiler {
 	private ExprList realParameters() {
 		ExprList anExprList = new ExprList();
 
-		if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
+		if ( lexer.token != Symbol.LEFTPAR )
+			signalError.show("'(' expected.");
 		lexer.nextToken();
+		
 		if ( startExpr(lexer.token) ) anExprList = exprList();
-		if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
+		
+		if ( lexer.token != Symbol.RIGHTPAR )
+			signalError.show("')' expected.");
 		lexer.nextToken();
+		
 		return anExprList;
 	}
 
@@ -1013,7 +1046,8 @@ public class Compiler {
 			Expr right = simpleExpr();
 			
 			// se forem de tipos compatíveis
-			if(isTypeConvRtoL(left.getType(), right.getType(), false))
+			if(isTypeConvRtoL(left.getType(), right.getType(), false) || 
+			   isTypeConvRtoL(right.getType(), left.getType(), false))
 			{
 				if(op == Symbol.EQ || op == Symbol.NEQ)
 				{
@@ -1026,62 +1060,22 @@ public class Compiler {
 					
 					// STRING
 					//else if()
-					
-					else
-					{
-						boolean leftIsNull = false, rightIsNull = false;
-
-						// left var is null
-						if(left instanceof IdExpr)
-							leftIsNull = ((IdExpr)left).getVariable().isNull();
-
-						else if(left instanceof StaticInstVarAccessExpr)
-							leftIsNull = ((StaticInstVarAccessExpr)left).getVariable().isNull();
-
-						else if(left instanceof SelfInstVarAccessExpr)
-							leftIsNull = ((SelfInstVarAccessExpr)left).getVariable().isNull();
-
-						// right var is null
-						if(right instanceof IdExpr)
-							rightIsNull = ((IdExpr)right).getVariable().isNull();
-
-						else if(right instanceof StaticInstVarAccessExpr)
-							rightIsNull = ((StaticInstVarAccessExpr)right).getVariable().isNull();
-
-						else if(right instanceof SelfInstVarAccessExpr)
-							rightIsNull = ((SelfInstVarAccessExpr)right).getVariable().isNull();
-
-						if(leftIsNull && rightIsNull)
-						{
-							signalError.show("Incompatible types cannot be compared with '"+
-								op+"' because the result will always be 'false'.");
-						}
-					}
 				}
 			
 				if(op == Symbol.LE || op == Symbol.LT ||
-					op == Symbol.GE || op == Symbol.GT){
+					op == Symbol.GE || op == Symbol.GT)
+				{
 					// apenas int pode ter essas operações
 					if(left.getType() != Type.intType)
 						signalError.show("Type '"+left.getType().getName()+
 							  "' does not support operator '"+op+"'.");
 				}
-				
-				/*if(op == Symbol.EQ || op == Symbol.NEQ){ // EQ e NEQ
-					// boolean, int, string ou classes podem ter essas operações
-					if(left.getType() != Type.booleanType && left.getType() != Type.intType &&
-						symbolTable.getInGlobal(left.getType().getName()) == null &&
-						left.getType() != Type.stringType){
-						
-						signalError.show("type '"+left.getType().getName()+
-							  "' does not support operator '"+op+"'.");
-					}
-				}*/
 			}
 			
 			else
-				signalError.show("Cannot compare left value's type '"+left.getType().getName()+"' "
-								 + "with right value's type '"+right.getType().getName()+"'.");
+				signalError.show("Cannot apply comparation '"+op.toString()+"' to "
+								 + "types '"+left.getType().getName()+"' and '"+right.getType().getName()+"'"
+								 + ", results would always be 'false'.");
 			
 			left = new CompositeExpr(left, op, right);
 		}
@@ -1102,19 +1096,22 @@ public class Compiler {
 			if(isTypeConvRtoL(left.getType(), right.getType(), false)){
 				// + e - com int
 				if( (op == Symbol.PLUS || op == Symbol.MINUS) 
-					  && left.getType() != Type.intType){
+					  && left.getType() != Type.intType) // se tipo foi compatível e left é int, right é int também
+				{
 					
-					signalError.show("type "+left.getType().getName()+
+					signalError.show("Type "+left.getType().getName()+
 							  " does not support operation '"+op+"'.");
 				}
 				// || com boolean
-				if(op == Symbol.OR && left.getType() != Type.booleanType){
-					signalError.show("type "+left.getType().getName()+
+				else if(op == Symbol.OR && left.getType() != Type.booleanType) // mesma lógica acima
+				{
+					signalError.show("Type "+left.getType().getName()+
 							  " does not support operation '"+op+"'.");
 				}
 			}
 			else{
-				signalError.show("operator '"+op.toString()+"' of 'int' expects an 'int' value");
+				signalError.show("Cannot apply operator '"+op.toString()+"' to "
+								 + "types '"+left.getType().getName()+"' and '"+right.getType().getName()+"'.");
 			}
 			left = new CompositeExpr(left, op, right);
 		}
@@ -1136,14 +1133,18 @@ public class Compiler {
 				if( (op == Symbol.DIV || op == Symbol.MULT) && 
 					  left.getType() != Type.intType){
 					
-					signalError.show("type '"+left.getType().getName()+
+					signalError.show("Type '"+left.getType().getName()+
 							  "' does not support operator '"+op+"'.");
 				}
 				// && com boolean
 				if(op == Symbol.AND && left.getType() != Type.booleanType){
-					signalError.show("type '"+left.getType().getName()+
+					signalError.show("Type '"+left.getType().getName()+
 							  "' does not support operator '"+op+"'.");
 				}
+			}
+			else{
+				signalError.show("Cannot apply operator '"+op.toString()+"' to "
+								 + "types '"+left.getType().getName()+"' and '"+right.getType().getName()+"'.");
 			}
 			
 			left = new CompositeExpr(left, op, right);
@@ -1159,8 +1160,8 @@ public class Compiler {
 			lexer.nextToken();
 			Expr e = factor();
 			if(e.getType() != Type.intType){
-				signalError.show("type '"+e.getType().getName()+
-							  "' does not support operator '"+op+"'.");
+				signalError.show("Cannot apply signal operator '"+op.toString()+"' to "
+								 + "type '"+e.getType().getName()+".");
 			}
 			return new SignalExpr(op, e);
 		}
@@ -1216,7 +1217,7 @@ public class Compiler {
 		case LEFTPAR:
 			lexer.nextToken();
 			e = expr();
-			if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
+			if ( lexer.token != Symbol.RIGHTPAR ) signalError.show("')' expected.");
 			lexer.nextToken();
 			return new ParenthesisExpr(e);
 
@@ -1232,7 +1233,8 @@ public class Compiler {
 			e = expr();
 			
 			if(e.getType() != Type.booleanType)
-				signalError.show("Operator '!' does not accepts '"+e.getType().getName()+"' values.");
+				signalError.show("Operator '"+Symbol.NOT.toString()+"' does not accept "
+								 + "type '"+e.getType().getName()+"', only '"+Type.booleanType.getName()+"'.");
 				
 			return new UnaryExpr(e, Symbol.NOT);
 			
@@ -1241,7 +1243,7 @@ public class Compiler {
 			lexer.nextToken(); // pula new
 			
 			if ( lexer.token != Symbol.IDENT )
-				signalError.show("Identifier expected");
+				signalError.show(SignalError.ident_expected);
 
 			String className = lexer.getStringValue();
 			/*
@@ -1256,10 +1258,10 @@ public class Compiler {
 
 			lexer.nextToken(); // pula IDENT
 			
-			if ( lexer.token != Symbol.LEFTPAR ) signalError.show("( expected");
+			if ( lexer.token != Symbol.LEFTPAR ) signalError.show("'(' expected.");
 			lexer.nextToken();
 			
-			if ( lexer.token != Symbol.RIGHTPAR ) signalError.show(") expected");
+			if ( lexer.token != Symbol.RIGHTPAR ) signalError.show("')' expected.");
 			lexer.nextToken();
 			
 			return new NewExpr(createdClass);
@@ -1279,14 +1281,12 @@ public class Compiler {
 			// "super" "." Id "(" [ ExpressionList ] ")"
 			lexer.nextToken(); // pula super
 			
-			if ( lexer.token != Symbol.DOT ) {
-				signalError.show("'.' expected");
-			}
-			else
-				lexer.nextToken();
+			if ( lexer.token != Symbol.DOT )
+				signalError.show("'.' expected.");
+			lexer.nextToken();
 			
 			if ( lexer.token != Symbol.IDENT )
-				signalError.show("Identifier expected");
+				signalError.show(SignalError.ident_expected);
 			messageName = lexer.getStringValue();
 			
 			if(currentClass.getSuperclass() == null)
@@ -1340,7 +1340,7 @@ public class Compiler {
 			// "."
 			lexer.nextToken(); // coma o "."
 			if ( lexer.token != Symbol.IDENT )
-				signalError.show("Identifier expected");
+				signalError.show(SignalError.ident_expected);
 
 			secondId = lexer.getStringValue();
 			lexer.nextToken();
@@ -1350,7 +1350,7 @@ public class Compiler {
 			{
 				lexer.nextToken(); // pula segundo .
 				if ( lexer.token != Symbol.IDENT )
-					signalError.show("Identifier expected");
+					signalError.show(SignalError.ident_expected);
 				
 				messageName = lexer.getStringValue();
 				lexer.nextToken();
@@ -1515,7 +1515,7 @@ public class Compiler {
 			// "."
 			lexer.nextToken(); // pula .
 			if ( lexer.token != Symbol.IDENT )
-				signalError.show("Identifier expected");
+				signalError.show("Identifier expected.");
 			
 			secondId = lexer.getStringValue();
 			lexer.nextToken(); // pula Id
@@ -1555,7 +1555,7 @@ public class Compiler {
 			{
 				lexer.nextToken(); // pula segundo .
 				if ( lexer.token != Symbol.IDENT )
-					signalError.show("Identifier expected");
+					signalError.show(SignalError.ident_expected);
 				
 				messageName = lexer.getStringValue();
 				lexer.nextToken();
@@ -1609,10 +1609,10 @@ public class Compiler {
 			}
 		
 			default:
-				signalError.show("Expression expected");
+				signalError.show("Expression expected.");
 		}
 		
-		signalError.show("Expression expected");
+		signalError.show("Expression expected.");
 		return null;
 	}
 
@@ -1634,7 +1634,8 @@ public class Compiler {
 				|| token == Symbol.NOT || token == Symbol.THIS
 				|| token == Symbol.LITERALINT || token == Symbol.SUPER
 				|| token == Symbol.LEFTPAR || token == Symbol.NULL
-				|| token == Symbol.IDENT || token == Symbol.LITERALSTRING;
+				|| token == Symbol.IDENT || token == Symbol.LITERALSTRING
+				|| token == Symbol.NEW;
 
 	}
 	
@@ -1645,66 +1646,67 @@ public class Compiler {
 		if(rightType == null)
 			throw new NullPointerException("RIGHT TYPE NULL");
 		
-		// se esquerda é String e direita é null
+		// String e null
 		if((leftType == Type.stringType &&
 			rightType == Type.nullType) ||
-		   (rightType == Type.stringType &&
-			leftType == Type.nullType))
+		   (leftType == Type.nullType &&
+			rightType == Type.stringType))
 		{
 			return true;
 		}
 		
-		// esquerda é classe e direita é null
+		// classe e null
 		if((symbolTable.getInGlobal(leftType.getName()) != null &&
 			  rightType == Type.nullType) ||
 		   (symbolTable.getInGlobal(rightType.getName()) != null &&
 			  leftType == Type.nullType)){
 			return true;
 		}
+		
+		// null e null
+		if(leftType == Type.nullType && rightType == Type.nullType)
+			return true;
 
-		if(rightType != Type.nullType){
-			//tipos básicos (boolean, int e string) e iguais
-			if(	leftType == Type.booleanType ||
-				leftType == Type.intType ||
-				leftType == Type.stringType ||
-				leftType == Type.voidType){
-				// mesmo nome
-				if(leftType.getName().equals(rightType.getName())){
-					return true;
-				}
-				else{
-					return false;
-				}
-			}
-			
-			// direita é subclasse da esquerda (classe é subclasse dela mesma)
-			KraClass rightClass = symbolTable.getInGlobal(rightType.getName());
-
-			if(rightClass != null){
-				KraClass leftClass = symbolTable.getInGlobal(leftType.getName());
-				
-				if(leftClass == null)
-					return false;
-
-				// mesma classe
-				if(rightClass.getName().equals(leftClass.getName()) ){
-					return true;
-				}
-
-				else if(!strict)
-				{
-					KraClass superRight = rightClass.getSuperclass();
-					while(superRight != null){
-						if(superRight.getName().equals(leftClass.getName())){
-							return true;
-						}
-						superRight = superRight.getSuperclass();
-					}
-				}
-				
-				// classe da direita não é subclasse da direita (ou mesma classe se strict)
+		//tipos básicos (boolean, int e string) e iguais
+		if(	leftType == Type.booleanType ||
+			leftType == Type.intType ||
+			leftType == Type.stringType ||
+			leftType == Type.voidType) // void para comparar tipos de retorno de funções
+		{
+			if(leftType == rightType)
+				return true;
+			else
 				return false;
+		}
+
+		// direita é subclasse da esquerda (classe é subclasse dela mesma)
+		KraClass rightClass = symbolTable.getInGlobal(rightType.getName());
+
+		if(rightClass != null)
+		{
+			KraClass leftClass = symbolTable.getInGlobal(leftType.getName());
+
+			if(leftClass == null)
+				return false;
+
+			// mesma classe
+			if(rightClass.getName().equals(leftClass.getName()))
+				return true;
+
+			// superclasse se não é comparação estrita
+			else if(!strict)
+			{
+				KraClass superRight = rightClass.getSuperclass();
+				while(superRight != null){
+					if(superRight.getName().equals(leftClass.getName())){
+						return true;
+					}
+					superRight = superRight.getSuperclass();
+				}
 			}
+
+			// classe da direita não é subclasse da direita (ou mesma classe se strict)
+			return false;
 		}
 		
 		return false;
@@ -1762,7 +1764,6 @@ public class Compiler {
 	}
 	
 	
-	private int insideWhile = 0;
-	private boolean hasReturn = false;
+	private int insideWhile = 0, insideIf = 0;	
 	private Type currentMethodReturnType = null;
 }

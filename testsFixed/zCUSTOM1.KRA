@@ -1,0 +1,45 @@
+@nce
+  
+class A
+{
+	public int m(A x)
+	{
+		
+		int c, i;
+		read(c, i);
+		write(c);
+
+		if(i == c)
+			if(1 == c)
+				return 1;
+			else
+			{
+				//while(i == 2)
+				while(true)
+				{
+					if(c == 3)
+					{
+					//	break;
+					}
+
+					return 1;
+				}
+			}
+		else
+			return 2;
+	}
+}
+
+class Program
+{
+	public void run()
+	{
+		A azinho;
+
+		int i;
+		i = azinho.m(new A());
+	}   
+
+}
+
+

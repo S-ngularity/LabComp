@@ -8,6 +8,8 @@ public class ReturnStmt extends Statement{
 	
 	public ReturnStmt(Expr e){
 		this.exprList.add(e);
+		
+		super.checkHasGrantedReturn();
 	}
 
 	@Override

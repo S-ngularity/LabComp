@@ -5,6 +5,11 @@
 package ast;
 
 public class BreakStatement extends Statement{
+	
+	public BreakStatement()
+	{
+		super.checkHasPossibleBreak();
+	}
 
 	@Override
 	public void genKra(PW pw) {

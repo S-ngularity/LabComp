@@ -81,8 +81,8 @@ public class SignalError {
        semicolon_expected = 1,
        last_error = 2;
     public final static String strError[] = {
-       "Identifier expected",
-       "; expected",
+       "Identifier expected.",
+       "';' expected.",
     };
     private Lexer lexer;
     private PrintWriter out;
