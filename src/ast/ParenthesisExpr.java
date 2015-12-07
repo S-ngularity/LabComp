@@ -15,6 +15,12 @@ public class ParenthesisExpr extends Expr {
         expr.genKra(pw, false);
         pw.print(")");
     }
+	
+	public void genC( PW pw, boolean putParenthesis ) {
+        pw.print("(");
+        expr.genC(pw, false);
+        pw.print(")");
+    }
     
     public Type getType() {
         return expr.getType();

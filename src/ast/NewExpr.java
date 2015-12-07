@@ -17,6 +17,12 @@ public class NewExpr extends Expr
 	{
 		pw.print("new "+getType().getName()+"()");
 	}
+	
+	@Override
+	public void genC(PW pw, boolean putParenthesis)
+	{
+		pw.print("new_"+getType().getName()+"()");
+	}
 
 	@Override
 	public Type getType()

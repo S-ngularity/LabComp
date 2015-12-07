@@ -49,7 +49,17 @@ public class Program {
 			pw.println("");
 		}
 		
-		//falta main do C
+		pw.printlnIdent("int main() {");
+		pw.add();
+		pw.printlnIdent("_class_Program *program;");
+		pw.println("");
+		pw.printlnIdent("program = new_Program();");
+		pw.println("");
+		pw.printlnIdent("( ( void (*)(_class_Program *) ) program->vt[0] )(program);"); // Nem sempre o número de run no vetor é 0. Como achar?
+		pw.println("");
+		pw.printlnIdent("return 0;");
+		pw.sub();
+		pw.printlnIdent("}");
 	}
 	
 	public ArrayList<KraClass> getClassList() {

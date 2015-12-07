@@ -108,8 +108,8 @@ public class KraClass extends Type {
 		pw.printlnIdent(getCname() + "* new_"+ super.getName() + "(void);");
 		pw.println("");
 		
+		// métodos
 		Iterator<Object> it = orderedMemberList.elements();
-	   
 		while(it.hasNext())
 		{
 			Object o = it.next();
@@ -123,18 +123,67 @@ public class KraClass extends Type {
 				if(m.isStatic())
 					pw.print("_static");
 
-				pw.print("_"+m.getName()+"("+ getCname() +" *this");
+				pw.print("_"+ super.getName() +"_"+m.getName()+"("+ getCname() +" *this");
 				
 				m.genC(pw);
 				
-				if(it.hasNext())
-					pw.println("");
+				pw.println("");
 			}
 		}
 		
-		//fazer tabela de métodos
+		// tabela de métodos
+		pw.printlnIdent("Func VTclass_"+ super.getName() +"[] = {");
+		pw.add();
 		
-		//fazer função new_...
+		it = orderedMemberList.elements();
+		boolean isNotFirst = false;
+		
+		while(it.hasNext())
+		{
+			Object o = it.next();
+			
+			
+			if(o instanceof Method)
+			{
+				Method m = (Method) o;
+				
+				if(!m.isStatic() && searchPublicMethod(m.getName()) != null)
+				{
+					if(isNotFirst)
+					{
+						pw.println(",");
+						pw.printIdent("(void (*) () ) _"+ super.getName() +"_"+m.getName()+"");
+					}
+					
+					else
+					{
+						pw.printIdent("(void (*) () ) _"+ super.getName() +"_"+m.getName()+"");
+						isNotFirst = true;
+					}
+				}
+			}
+		}
+		
+		pw.println("");
+		
+		pw.sub();
+		pw.printlnIdent("};");
+		pw.println("");
+		
+		// função new_NomeDaClasse()
+		pw.printlnIdent(getCname() + "* new_"+ super.getName() +"()");
+		pw.printlnIdent("{");
+		pw.add();
+		pw.printlnIdent(getCname() + " *t;");
+		pw.println("");
+		pw.printlnIdent("if ( (t = malloc(sizeof("+ getCname() +"))) != NULL )");
+		pw.add();
+		pw.printlnIdent("t->vt = VTclass_"+ super.getName() +";");
+		pw.sub();
+		pw.println("");
+		pw.printlnIdent("return t;");
+		pw.sub();
+		pw.printlnIdent("}");
 		
    }
    

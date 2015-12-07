@@ -15,6 +15,12 @@ public class LiteralBoolean extends Expr {
 	{
 		pw.print( value ? "true" : "false" );
     }
+	
+	@Override
+	public void genC( PW pw, boolean putParenthesis )
+	{
+		pw.print( value ? "true" : "false" );
+    }
 
     @Override
 	public Type getType() {

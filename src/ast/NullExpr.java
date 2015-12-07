@@ -10,6 +10,10 @@ public class NullExpr extends Expr {
       pw.print("null");
    }
    
+   public void genC( PW pw, boolean putParenthesis ) {
+      pw.print("NULL");
+   }
+   
    public Type getType() {
       //# corrija
       //return null;
