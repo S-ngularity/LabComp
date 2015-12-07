@@ -4,6 +4,8 @@
 */
 package ast;
 
+import java.util.Iterator;
+
 public class WritelnStmt extends Statement{
 	
 	ExprList exprs;
@@ -17,6 +19,33 @@ public class WritelnStmt extends Statement{
 		pw.printIdent("writeln(");
 		exprs.genKra(pw);
 		pw.print(");");
+	}
+	
+	@Override
+	public void genC(PW pw) {
+		
+		Iterator<Expr> it = exprs.elements();
+		
+		while(it.hasNext())
+		{
+			Expr v = it.next();
+			
+			if(v.getType() == Type.intType)
+			{
+				pw.printIdent("printf(\"%d \", ");
+				v.genC(pw, true);
+				pw.println(");");
+			}
+			
+			else if(v.getType() == Type.stringType)
+			{
+				pw.printIdent("puts(");
+				v.genC(pw, true);
+				pw.println(");");
+			}
+		}
+		
+		pw.println("");
 	}
 	
 }

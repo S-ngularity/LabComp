@@ -16,4 +16,9 @@ public class BreakStatement extends Statement{
 		pw.printIdent("break;");
 	}
 	
+	@Override
+	public void genC(PW pw) {
+		pw.printIdent("break;");
+	}
+	
 }

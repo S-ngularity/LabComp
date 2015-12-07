@@ -12,13 +12,20 @@ public class MessageSendStatement extends Statement {
 	}
 
 	@Override
-   public void genKra( PW pw ) {
-      pw.printIdent("");
-      msgSend.genKra(pw, false);
-      pw.print(";");
-   }
+	public void genKra( PW pw ) {
+	   pw.printIdent("");
+	   msgSend.genKra(pw, false);
+	   pw.print(";");
+	}
 
-   private MessageSend  msgSend;
+	@Override
+	public void genC( PW pw ) {
+	   pw.printIdent("");
+	   msgSend.genKra(pw, false);
+	   pw.print(";");
+	}
+
+	private MessageSend  msgSend;
 
 }
 

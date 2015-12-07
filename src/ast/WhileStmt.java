@@ -28,4 +28,19 @@ public class WhileStmt extends Statement{
 		pw.printIdent("}");
 	}
 	
+	@Override
+	public void genC(PW pw) {
+		pw.printIdent("while(");
+		exprList.get(0).genC(pw, false);
+		pw.println(")");
+		pw.printlnIdent("{");
+		pw.add();
+		
+		stmt.genKra(pw);
+		
+		pw.sub();
+		pw.println("");
+		pw.printIdent("}");
+	}
+	
 }

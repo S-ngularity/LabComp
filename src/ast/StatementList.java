@@ -40,5 +40,21 @@ public class StatementList extends Statement{
 		}
 	}
 	
+	@Override
+	public void genC(PW pw)
+	{
+		Iterator<Statement> it = elements();
+		
+		while(it.hasNext())
+		{
+			Statement s = it.next();
+			
+			s.genC(pw);
+			
+			if(it.hasNext())
+				pw.println("");
+		}
+	}
+	
     private ArrayList<Statement> stList;
 }

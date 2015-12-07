@@ -26,6 +26,21 @@ public class ParamList {
 				pw.print(", ");
 		}
 	}
+	
+	public void genC(PW pw)
+	{
+		Iterator<Variable> it = elements();
+		
+		while(it.hasNext())
+		{
+			Variable v = it.next();
+			
+			pw.print(v.getType().getCname()+" "+v.getCname());
+			
+			if(it.hasNext())
+				pw.print(", ");
+		}
+	}
 
     public void addElement(Variable v) {
        paramList.add(v);

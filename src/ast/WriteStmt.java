@@ -4,6 +4,8 @@
 */
 package ast;
 
+import java.util.Iterator;
+
 public class WriteStmt extends Statement{
 	
 	ExprList exprs;
@@ -19,4 +21,31 @@ public class WriteStmt extends Statement{
 		pw.print(");");
 	}
 	
+	@Override
+	public void genC(PW pw) {
+		
+		Iterator<Expr> it = exprs.elements();
+		
+		while(it.hasNext())
+		{
+			Expr v = it.next();
+			
+			if(v.getType() == Type.intType)
+			{
+				pw.printIdent("printf(\"%d \", ");
+				v.genC(pw, true);
+				pw.println(");");
+			}
+			
+			else if(v.getType() == Type.stringType)
+			{
+				pw.printIdent("fputs(");
+				v.genC(pw, true);
+				pw.println(", stdout);");
+			}
+		}
+		
+		pw.println("");
+	}
+
 }

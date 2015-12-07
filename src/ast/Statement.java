@@ -33,5 +33,6 @@ abstract public class Statement {
 	}
 
 	abstract public void genKra(PW pw);
+	abstract public void genC(PW pw);
 
 }

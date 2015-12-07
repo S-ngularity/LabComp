@@ -34,6 +34,23 @@ public class Method {
 		pw.println("");
 		pw.printlnIdent("}");
 	}
+	
+	public void genC(PW pw)
+	{
+		if(!isStatic() && parameterList.getSize() > 0)
+			pw.print(", ");
+		
+		parameterList.genC(pw);
+		pw.println(")");
+		pw.printlnIdent("{");
+		
+		pw.add();
+		stmtList.genC(pw);
+		pw.sub();
+		
+		pw.println("");
+		pw.printlnIdent("}");
+	}
 
     public String getName() { return name; }
 

@@ -92,8 +92,57 @@ public class KraClass extends Type {
 	   pw.printIdent("}");
    }
    
+   public void genC(PW pw)
+   {
+		pw.printlnIdent("typedef");
+		pw.printlnIdent("struct _St_"+ super.getName() +" {");
+		pw.add();
+		pw.printlnIdent("Func *vt;");
+		pw.printlnIdent("//var membros da superclasse");
+		pw.printlnIdent("//var membros da classe");
+		pw.sub();
+		pw.printlnIdent("} "+ getCname() +";");
+		pw.println("");
+		pw.printlnIdent("//var estaticas (globais)");
+		pw.println("");
+		pw.printlnIdent(getCname() + "* new_"+ super.getName() + "(void);");
+		pw.println("");
+		
+		Iterator<Object> it = orderedMemberList.elements();
+	   
+		while(it.hasNext())
+		{
+			Object o = it.next();
+
+			if(o instanceof Method)
+			{
+				Method m = (Method) o;
+				
+				pw.print(m.getType().getCname()+" ");
+
+				if(m.isStatic())
+					pw.print("_static");
+
+				pw.print("_"+m.getName()+"("+ getCname() +" *this");
+				
+				m.genC(pw);
+				
+				if(it.hasNext())
+					pw.println("");
+			}
+		}
+		
+		//fazer tabela de métodos
+		
+		//fazer função new_...
+		
+   }
+   
    public String getCname() {
-      return getName();
+		if(getName().equals("null"))
+			return("NULL");
+		else
+			return "_class_"+ super.getName();
    }
    
    public boolean isFinal()

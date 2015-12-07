@@ -26,4 +26,17 @@ public class AssignStmt extends Statement{
 		pw.print(";");
 	}
 	
+	@Override
+	public void genC(PW pw) {
+		pw.printIdent("");
+		left.genC(pw, false);
+		
+		if(right!= null){
+			pw.print(" = ");
+			right.genC(pw, false);
+		}
+		
+		pw.print(";");
+	}
+	
 }

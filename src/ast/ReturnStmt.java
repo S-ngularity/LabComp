@@ -19,4 +19,11 @@ public class ReturnStmt extends Statement{
 		pw.print(";");
 	}
 	
+	@Override
+	public void genC(PW pw) {
+		pw.printIdent("return ");
+		exprList.get(0).genC(pw, true);
+		pw.print(";");
+	}
+	
 }

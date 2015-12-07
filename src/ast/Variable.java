@@ -12,6 +12,8 @@ public class Variable {
     }
 
     public String getName() { return name; }
+	
+	public String getCname() { return "_"+name; }
 
     public Type getType() {
         return type;

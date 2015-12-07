@@ -18,5 +18,11 @@ public class LocalDecStmt extends Statement
 		pw.printIdent(declaredVar.getType().getName()+" "+declaredVar.getName()+";");
 	}
 	
+	@Override
+	public void genC(PW pw)
+	{
+		pw.printIdent(declaredVar.getType().getCname()+" "+declaredVar.getCname()+";");
+	}
+	
 	Variable declaredVar;
 }

@@ -46,4 +46,34 @@ public class IfStmt extends Statement{
 		pw.printIdent("}");
 	}
 	
+	@Override
+	public void genC(PW pw) {
+		pw.printIdent("if(");
+		
+		for(Expr e : exprList)
+			e.genC(pw, false);
+		
+		pw.println(")");
+		pw.printlnIdent("{");
+		pw.add();
+		
+		ifStmt.genC(pw);
+		
+		if(elseStmt != null){
+			pw.sub();
+			pw.println("");
+			pw.printlnIdent("}"); //fecha o if
+			
+			pw.println("");
+			pw.printlnIdent("else");
+			pw.printlnIdent("{");
+			pw.add();
+			elseStmt.genC(pw);
+		}
+		
+		pw.sub();
+		pw.println("");
+		pw.printIdent("}");
+	}
+	
 }

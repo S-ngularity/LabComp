@@ -11,4 +11,9 @@ public class NullStatement extends Statement{
 		pw.printIdent(";");
 	}
 	
+	@Override
+	public void genC(PW pw) {
+		pw.printIdent(";");
+	}
+	
 }
