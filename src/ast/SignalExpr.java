@@ -30,9 +30,9 @@ public class SignalExpr extends Expr {
 	   
        pw.print( oper == Symbol.PLUS ? "+" : "-" );
 	   
-	   pw.print("(");
+	   //pw.print("(");
        expr.genC(pw, true);
-	   pw.print(")");
+	   //pw.print(")");
 	   
        if ( putParenthesis )
           pw.print(")");

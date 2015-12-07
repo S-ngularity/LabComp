@@ -59,7 +59,7 @@ public class Method {
 	public String getCname()
 	{
 		if(isStatic())
-			return "_static"+ ownerClass.getCname() +"_"+getName();
+			return "_static_"+ ownerClass.getName() +"_"+getName();
 
 		else
 			return "_" + ownerClass.getName() +"_"+getName();

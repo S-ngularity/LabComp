@@ -8,11 +8,11 @@ import java.util.Iterator;
 
 public class MessageSendToVariable extends MessageSend { 
 	
-	public MessageSendToVariable(Variable var, Method message, ExprList params)
+	public MessageSendToVariable(Variable v, Method message, ExprList params)
 	{
 		super(message, params);
 		
-		v = var;
+		calledVar = v;
 	}
 
 	@Override
@@ -23,56 +23,61 @@ public class MessageSendToVariable extends MessageSend {
 	@Override
     public void genKra( PW pw, boolean putParenthesis )
 	{
-		pw.print(v.getName()+".");
+		pw.print(calledVar.getName()+".");
 		super.genKra(pw, false);
     }
 	
-//	@Override
-//    public void genC( PW pw, boolean putParenthesis )
-//	{
-//		if(v.getType() == m.ownerClass && m.ownerClass.searchPrivateMethod(m.getName()) != null)
-//		{
-//			pw.print(m.getCname() + "(" + m.ownerClass.getCname() + ") this");
-//		
-//			if(exprList.getSize() > 0)
-//				pw.print(", ");
-//
-//			exprList.genC(pw);
-//			pw.print(")");
-//		}
-//		
-//		else
-//		{
-//			//( (int (*)(_class_A *)) this->vt[0]) ( (_class_A *) this )
-//
-//			pw.print("( ("+ m.getType().getCname() +" (*)(");
-//
-//			/* CLASSE A SER PASSADA NÃO NECESSARIAMENTE É A DA SELF, CASO FUNÇÃO SEJA DE SUPERCLASSE */
-//			pw.print(m.ownerClass.getCname() + "*");
-//
-//			if(m.getParamList().getSize() > 0)
-//			{
-//				Iterator<Variable> it = m.getParamList().elements();
-//				while(it.hasNext())
-//				{
-//					Variable v = (Variable) it.next();
-//
-//					pw.print(", ");
-//					pw.print(v.getType().getCname());
-//				}
-//			}
-//
-//			pw.print(")) this->vt[" + self.getCMethodIndex(m.getName()) + "]) ");
-//
-//			pw.print("( (" + m.ownerClass.getCname() + "*) this");
-//			
-//			if(exprList.getSize() > 0)
-//				pw.print(", ");
-//			
-//			exprList.genC(pw);
-//			pw.print(")");
-//		}
-//    }
+	@Override
+    public void genC( PW pw, boolean putParenthesis )
+	{
+		// se m é função declarada na classe da variável v
+		// e m é método privado da classe
+		// então a chamada pra função privada da variável só pode estar acontecendo dentro da
+		// própria classe da variável (e da função, que é a mesma) - por causa da semântica do comp
+		// que não permite chamar funções privadas de fora da classe que a declara 
+		if(calledVar.getType() == m.ownerClass && m.ownerClass.searchPrivateMethod(m.getName()) != null)
+		{
+			pw.print(m.getCname() + "(" + calledVar.getCname());
+		
+			if(exprList.getSize() > 0)
+				pw.print(", ");
 
-    private Variable v;
+			exprList.genC(pw);
+			pw.print(")");
+		}
+		
+		else
+		{
+			//( (int (*)(_class_A *, ...)) this->vt[0]) ( (_class_A *) this, ... )
+
+			pw.print("( ("+ m.getType().getCname() +" (*)(");
+
+			/* CLASSE A SER PASSADA NÃO NECESSARIAMENTE É A DA SELF, CASO FUNÇÃO SEJA DE SUPERCLASSE */
+			pw.print(m.ownerClass.getCname());
+
+			if(m.getParamList().getSize() > 0)
+			{
+				Iterator<Variable> it = m.getParamList().elements();
+				while(it.hasNext())
+				{
+					Variable v = (Variable) it.next();
+
+					pw.print(", ");
+					pw.print(v.getType().getCname());
+				}
+			}
+
+			pw.print(")) " + calledVar.getCname() + "->vt[" + m.ownerClass.getCMethodIndex(m.getName()) + "]) ");
+
+			pw.print("( (" + m.ownerClass.getCname() + ") " + calledVar.getCname());
+			
+			if(exprList.getSize() > 0)
+				pw.print(", ");
+			
+			exprList.genC(pw);
+			pw.print(")");
+		}
+    }
+
+    private Variable calledVar;
 }    

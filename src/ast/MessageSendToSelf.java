@@ -43,12 +43,12 @@ public class MessageSendToSelf extends MessageSend {
 		
 		else
 		{
-			//( (int (*)(_class_A *)) this->vt[0]) ( (_class_A *) this )
+			//( (int (*)(_class_A *, ...)) this->vt[0]) ( (_class_A *) this, ... )
 
 			pw.print("( ("+ m.getType().getCname() +" (*)(");
 
 			/* CLASSE A SER PASSADA NÃO NECESSARIAMENTE É A DA SELF, CASO FUNÇÃO SEJA DE SUPERCLASSE */
-			pw.print(m.ownerClass.getCname() + "*");
+			pw.print(m.ownerClass.getCname());
 
 			if(m.getParamList().getSize() > 0)
 			{
@@ -64,7 +64,7 @@ public class MessageSendToSelf extends MessageSend {
 
 			pw.print(")) this->vt[" + self.getCMethodIndex(m.getName()) + "]) ");
 
-			pw.print("( (" + m.ownerClass.getCname() + "*) this");
+			pw.print("( (" + m.ownerClass.getCname() + ") this");
 			
 			if(exprList.getSize() > 0)
 				pw.print(", ");

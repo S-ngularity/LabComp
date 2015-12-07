@@ -29,7 +29,7 @@ public class MessageSendToSuper extends MessageSend {
 	@Override
     public void genC( PW pw, boolean putParenthesis )
 	{
-		pw.print(m.getCname() + "((" + m.ownerClass.getCname() + "*) this");
+		pw.print(m.getCname() + "((" + m.ownerClass.getCname() + ") this");
 		
 		if(exprList.getSize() > 0)
 			pw.print(", ");

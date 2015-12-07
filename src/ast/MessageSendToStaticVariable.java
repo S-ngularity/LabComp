@@ -4,6 +4,8 @@
 */
 package ast;
 
+import java.util.Iterator;
+
 public class MessageSendToStaticVariable extends MessageSend
 {
 
@@ -11,8 +13,8 @@ public class MessageSendToStaticVariable extends MessageSend
 	{
 		super(message, params);
 
-		accClass = accessedClass;
-		v = accessedStaticVar;
+		this.accessedClass = accessedClass;
+		this.accessedStaticVar = accessedStaticVar;
 	}
 	
 	@Override
@@ -23,10 +25,22 @@ public class MessageSendToStaticVariable extends MessageSend
 	@Override
     public void genKra( PW pw, boolean putParenthesis )
 	{
-		pw.print(accClass.getName()+"."+v.getName()+".");
+		pw.print(accessedClass.getName()+"."+accessedStaticVar.getName()+".");
 		super.genKra(pw, false);
     }
+	
+	@Override
+    public void genC( PW pw, boolean putParenthesis )
+	{
+		pw.print(m.getCname() + "(" + "_static_"+ accessedClass.getName() + "_" + accessedStaticVar.getName());
 
-    private InstanceVariable v;
-	private KraClass accClass;
+		if(exprList.getSize() > 0)
+			pw.print(", ");
+
+		exprList.genC(pw);
+		pw.print(")");
+    }
+
+    private InstanceVariable accessedStaticVar;
+	private KraClass accessedClass;
 }

@@ -118,11 +118,11 @@ public class KraClass extends Type {
 		genCMemberVars(pw);
 		pw.sub();
 		pw.println("");
-		pw.printlnIdent("} "+ getCname() +";");
+		pw.printlnIdent("} _class_"+ super.getName() +";");
 		pw.println("");
 		genCStaticMemberVars(pw);
 		pw.println("");
-		pw.printlnIdent(getCname() + "* new_"+ super.getName() + "(void);");
+		pw.printlnIdent(getCname() + " new_"+ super.getName() + "(void);");
 		pw.println("");
 		
 		// métodos
@@ -157,7 +157,7 @@ public class KraClass extends Type {
 				}
 				
 				else
-					pw.print("_"+ super.getName() +"_"+m.getName()+"("+ getCname() +" *this");
+					pw.print("_"+ super.getName() +"_"+m.getName()+"("+ getCname() +" this");
 				
 				m.genC(pw);
 				
@@ -174,12 +174,12 @@ public class KraClass extends Type {
 		pw.println("");
 		
 		// função new_NomeDaClasse()
-		pw.printlnIdent(getCname() + "* new_"+ super.getName() +"()");
+		pw.printlnIdent(getCname() + " new_"+ super.getName() +"()");
 		pw.printlnIdent("{");
 		pw.add();
-		pw.printlnIdent(getCname() + " *t;");
+		pw.printlnIdent(getCname() + " t;");
 		pw.println("");
-		pw.printlnIdent("if ( (t = malloc(sizeof("+ getCname() +"))) != NULL )");
+		pw.printlnIdent("if ( (t = malloc(sizeof(_class_"+ getName() +"))) != NULL )");
 		pw.add();
 		pw.printlnIdent("t->vt = VTclass_"+ super.getName() +";");
 		pw.sub();
@@ -307,7 +307,7 @@ public class KraClass extends Type {
 		if(getName().equals("null"))
 			return("NULL");
 		else
-			return "_class_"+ super.getName();
+			return "_class_"+ super.getName()+"*";
    }
    
    public boolean isFinal()

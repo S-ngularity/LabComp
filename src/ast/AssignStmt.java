@@ -42,7 +42,7 @@ public class AssignStmt extends Statement{
 				&& right.getType() instanceof KraClass
 				&& !right.getType().getName().equals(left.getType().getName()))
 			{
-				pw.print("(" + left.getType().getCname() + " *) ");
+				pw.print("(" + left.getType().getCname() + ") ");
 			}
 			
 			right.genC(pw, false);

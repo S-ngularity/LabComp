@@ -28,9 +28,9 @@ public class Program {
 
 	public void genC(PW pw)
 	{
-		pw.println("#include <malloc.h>");
 		pw.println("#include <stdlib.h>");
 		pw.println("#include <stdio.h>");
+		pw.println("#include <string.h>");
 		pw.println("");
 		pw.println("typedef int boolean;");
 		pw.println("#define true 1");

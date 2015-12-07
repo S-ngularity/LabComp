@@ -22,7 +22,7 @@ public class ReturnStmt extends Statement{
 	@Override
 	public void genC(PW pw) {
 		pw.printIdent("return ");
-		exprList.get(0).genC(pw, true);
+		exprList.get(0).genC(pw, false);
 		pw.print(";");
 	}
 	

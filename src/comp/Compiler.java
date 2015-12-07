@@ -1583,7 +1583,7 @@ public class Compiler {
 				if(calledMethod == null)
 				{
 					KraClass dummySuperclass = null;
-					calledMethod = secondIdClass.searchSuperclassMethod(secondId, dummySuperclass);
+					calledMethod = secondIdClass.searchSuperclassMethod(messageName, dummySuperclass);
 				}
 
 				if(calledMethod == null)

@@ -1,0 +1,47 @@
+@nce
+  
+class A{
+	
+	
+}
+
+class B{
+	private A n;
+
+	private void put(A num)
+	{
+		this.n = num;
+	}
+
+	public void put2(A num)
+	{
+		this.n = num;
+	}
+
+	private void test()
+	{
+		B b;
+		b = new B();
+		A a;
+		a = new A();
+
+		b.put(a);
+	}
+}
+
+class Z extends B{
+	
+}
+
+class Program
+{
+	public void run()
+	{
+		B b;
+		b = new Z();
+		A a;
+		a = new A();
+
+		b.put2(a);
+	}
+}
