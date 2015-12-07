@@ -32,7 +32,12 @@ public class WriteStmt extends Statement{
 			
 			if(v.getType() == Type.intType)
 			{
+				// SEM ESPAÇO depois do int
+				//pw.printIdent("printf(\"%d\", ");
+				
+				// COM ESPAÇO depois do int
 				pw.printIdent("printf(\"%d \", ");
+				
 				v.genC(pw, true);
 				pw.print(");");
 				
@@ -42,17 +47,17 @@ public class WriteStmt extends Statement{
 			
 			else if(v.getType() == Type.stringType)
 			{
-				// IMPLEMENTAÇÃO CERTA DE ACORDO COM ESPECIFICAÇÃO DO KRAKATOA, COM WRITE NÃO PULANDO LINHA
-				/*
+				// IMPLEMENTAÇÃO MAIS COERENTE, COM WRITE NÃO PULANDO LINHA
 				pw.printIdent("fputs(");
 				v.genC(pw, true);
 				pw.print(", stdout);");
-				*/
 				
 				// implementação de acordo com o PDF de geração de código C
+				/*
 				pw.printIdent("puts(");
 				v.genC(pw, true);
 				pw.print(");");
+				*/
 				
 				if(it.hasNext())
 					pw.println("");

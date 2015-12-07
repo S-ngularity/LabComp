@@ -32,24 +32,36 @@ public class WritelnStmt extends Statement{
 			
 			if(v.getType() == Type.intType)
 			{
-				pw.printIdent("printf(\"%d\\n\", ");
+				// SEM ESPAÇO depois do int
+				//pw.printIdent("printf(\"%d\", ");
+				
+				// COM ESPAÇO depois do int
+				pw.printIdent("printf(\"%d \", ");
+				
 				v.genC(pw, true);
 				pw.print(");");
-				
-				if(it.hasNext())
-					pw.println("");
+				pw.println("");
 			}
 			
 			else if(v.getType() == Type.stringType)
 			{
+				// IMPLEMENTAÇÃO MAIS COERENTE
+				pw.printIdent("fputs(");
+				v.genC(pw, true);
+				pw.print(", stdout);");
+				
+				// implementação de acordo com o PDF de geração de código C
+				/*
 				pw.printIdent("puts(");
 				v.genC(pw, true);
 				pw.print(");");
+				*/
 				
-				if(it.hasNext())
-					pw.println("");
+				pw.println("");
 			}
 		}
+		
+		pw.printlnIdent("printf(\"\\n\");");
 	}
 	
 }
