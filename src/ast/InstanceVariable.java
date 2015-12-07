@@ -14,4 +14,9 @@ public class InstanceVariable extends Variable {
 	{
 		pw.println("private "+super.getType().getName()+" "+super.getName()+";");
 	}
+	
+	public void genC(PW pw)
+	{
+		//pw.println(super.getType().getCname()+" _"+ /* nome da classe */ +"+super.getName()+";");
+	}
 }

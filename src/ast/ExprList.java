@@ -26,6 +26,16 @@ public class ExprList {
         }
     }
 	
+	public void genC( PW pw ) {
+
+        int size = exprList.size();
+        for ( Expr e : exprList ) {
+        	e.genC(pw, false);
+            if ( --size > 0 )
+                pw.print(", ");
+        }
+    }
+	
 	public Iterator<Expr> elements() {
     	return this.exprList.iterator();
     }

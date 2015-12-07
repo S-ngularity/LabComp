@@ -39,9 +39,9 @@ public class ReadStmt extends Statement{
 				pw.add();
 				pw.printlnIdent("char __s[512];");
 				pw.printlnIdent("gets(__s);");
-				pw.printIdent("sscanf(__s, \"%d\", &");
-				v.genC(pw, true);
-				pw.println(");");
+				pw.printIdent("sscanf(__s, \"%d\", &(");
+				v.genC(pw, false);
+				pw.println("));");
 				pw.sub();
 				pw.printlnIdent("}");
 			}

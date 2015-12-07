@@ -20,6 +20,11 @@ public class AssignStmt extends Statement{
 		
 		if(right!= null){
 			pw.print(" = ");
+			
+			// cast do tipo do right pro tipo do left se right for KraClass subclasse de left
+			// que classes da AST podem ser Right que precisam de cast, de acordo com a semântica de Krakatoa?
+			// NewExpr e VariableExpr? algo mais?
+			
 			right.genKra(pw, false);
 		}
 		
