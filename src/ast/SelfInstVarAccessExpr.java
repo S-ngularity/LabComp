@@ -18,6 +18,12 @@ public class SelfInstVarAccessExpr extends Expr
 	{
 		pw.print("this."+staticVar.getName());
 	}
+	
+	@Override
+	public void genC(PW pw, boolean putParenthesis)
+	{
+		pw.print("this->_"+ cClass.getName() + "_" + staticVar.getName());
+	}
 
 	@Override
 	public Type getType()

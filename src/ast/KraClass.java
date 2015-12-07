@@ -25,6 +25,8 @@ public class KraClass extends Type {
 		privateStaticMethodList = new MethodList();
 		
 		orderedMemberList = new OrderedClassMemberList();
+		
+		orderedCPublicMethodList = new MethodList();
    }
    
    public void genKra(PW pw)
@@ -94,16 +96,31 @@ public class KraClass extends Type {
    
    public void genC(PW pw)
    {
+	   // Adiciona métodos da superclasse na lista de métodos dessa classe.
+		// Como as classes têm que ser declaradas em ordem, sempre que chegar numa subclasse,
+		// a superclasse ja vai ter sido gerada e portanto sua orderedCPublicMethodList já está cheia
+		// com suas respectivas superclasses (recursivamente, da mesma maneira)
+		if(superclass != null)
+		{
+			Iterator<Method> it = superclass.orderedCPublicMethodList.elements();
+			
+			while(it.hasNext())
+			{
+				Method m = it.next();
+				orderedCPublicMethodList.addElement(m);
+			}
+		}
+		
 		pw.printlnIdent("typedef");
 		pw.printlnIdent("struct _St_"+ super.getName() +" {");
 		pw.add();
 		pw.printlnIdent("Func *vt;");
-		pw.printlnIdent("//var membros da superclasse");
-		pw.printlnIdent("//var membros da classe");
+		genCMemberVars(pw);
 		pw.sub();
+		pw.println("");
 		pw.printlnIdent("} "+ getCname() +";");
 		pw.println("");
-		pw.printlnIdent("//var estaticas (globais)");
+		genCStaticMemberVars(pw);
 		pw.println("");
 		pw.printlnIdent(getCname() + "* new_"+ super.getName() + "(void);");
 		pw.println("");
@@ -118,12 +135,29 @@ public class KraClass extends Type {
 			{
 				Method m = (Method) o;
 				
+				// adiciona próprios métodos na lista, colocando na mesma posição do método da
+				// superclasse, se existir, ou no final, caso contrário
+				if(!m.isStatic() && searchPublicMethod(m.getName()) != null)
+				{
+					int index = getCSuperclassMethodIndex(m.getName());
+						
+					if(index != -1)
+						orderedCPublicMethodList.set(index, m);
+
+					else
+						orderedCPublicMethodList.addElement(m);
+				}
+				
+				// print
 				pw.print(m.getType().getCname()+" ");
 
 				if(m.isStatic())
-					pw.print("_static");
-
-				pw.print("_"+ super.getName() +"_"+m.getName()+"("+ getCname() +" *this");
+				{
+					pw.print("_static_"+ super.getName() +"_"+m.getName()+"(");
+				}
+				
+				else
+					pw.print("_"+ super.getName() +"_"+m.getName()+"("+ getCname() +" *this");
 				
 				m.genC(pw);
 				
@@ -134,38 +168,7 @@ public class KraClass extends Type {
 		// tabela de métodos
 		pw.printlnIdent("Func VTclass_"+ super.getName() +"[] = {");
 		pw.add();
-		
-		it = orderedMemberList.elements();
-		boolean isNotFirst = false;
-		
-		while(it.hasNext())
-		{
-			Object o = it.next();
-			
-			
-			if(o instanceof Method)
-			{
-				Method m = (Method) o;
-				
-				if(!m.isStatic() && searchPublicMethod(m.getName()) != null)
-				{
-					if(isNotFirst)
-					{
-						pw.println(",");
-						pw.printIdent("(void (*) () ) _"+ super.getName() +"_"+m.getName()+"");
-					}
-					
-					else
-					{
-						pw.printIdent("(void (*) () ) _"+ super.getName() +"_"+m.getName()+"");
-						isNotFirst = true;
-					}
-				}
-			}
-		}
-		
-		pw.println("");
-		
+		genCmethodTable(pw);
 		pw.sub();
 		pw.printlnIdent("};");
 		pw.println("");
@@ -186,6 +189,119 @@ public class KraClass extends Type {
 		pw.printlnIdent("}");
 		
    }
+   
+   
+	public boolean genCmethodTable(PW pw)
+	{
+		// print da lista de métodos final
+		Iterator<Method> itMethods = orderedCPublicMethodList.elements();
+		boolean isNotFirst = false;
+		
+		while(itMethods.hasNext())
+		{
+			Method m = itMethods.next();
+			
+			if(isNotFirst)
+			{
+				pw.println(",");
+				pw.printIdent("(void (*) () ) "+ m.getCname());
+			}
+
+			else
+			{
+				pw.printIdent("(void (*) () ) "+ m.getCname());
+				isNotFirst = true;
+			}
+		}
+		
+		if(isNotFirst)
+			pw.println("");
+		
+		return isNotFirst;
+	}
+	
+	int getCSuperclassMethodIndex(String methodName)
+	{
+		if(superclass == null)
+			return -1;
+		
+		else
+			return superclass.orderedCPublicMethodList.getMethodIndex(methodName);
+	}
+	
+	int getCMethodIndex(String methodName)
+	{
+		int index = orderedCPublicMethodList.getMethodIndex(methodName);
+
+		if(index != -1)
+			return index;
+
+		else if(superclass == null)
+			return -1;
+
+		else
+			return superclass.orderedCPublicMethodList.getMethodIndex(methodName);
+	}
+	
+	public boolean genCMemberVars(PW pw)
+	{
+		boolean isNotFirst = false;
+
+		if(superclass != null)
+		{
+			if(superclass.genCMemberVars(pw))
+				isNotFirst = true;
+		}
+
+		Iterator<Object> it = orderedMemberList.elements();
+
+		while(it.hasNext())
+		{
+			Object o = it.next();
+
+			if(o instanceof InstanceVariable)
+			{
+				InstanceVariable v = (InstanceVariable) o;
+
+				if(searchInstVar(v.getName()) != null)
+				{
+					if(isNotFirst)
+					{
+						pw.println(",");
+						pw.printIdent(v.getType().getCname()+" _"+ getName() + "_" + v.getName());
+					}
+
+					else
+					{
+						pw.printIdent(v.getType().getCname()+" _"+ getName() + "_" + v.getName());
+						isNotFirst = true;
+					}
+				}
+			}
+		}
+		
+		return isNotFirst;
+	}
+	
+	public void genCStaticMemberVars(PW pw)
+	{
+		Iterator<Object> it = orderedMemberList.elements();
+		
+		while(it.hasNext())
+		{
+			Object o = it.next();
+
+			if(o instanceof InstanceVariable)
+			{
+				InstanceVariable v = (InstanceVariable) o;
+
+				if(searchStaticInstVar(v.getName()) != null)
+					pw.printlnIdent(v.getType().getCname()+" _static_"+ getName() + "_" + v.getName() + ";");
+			}
+		}
+
+		pw.println("");
+	}
    
    public String getCname() {
 		if(getName().equals("null"))
@@ -317,6 +433,8 @@ public class KraClass extends Type {
    private MethodList publicMethodList, privateMethodList, publicStaticMethodList, privateStaticMethodList;
    
    private OrderedClassMemberList orderedMemberList;
+   
+   protected MethodList orderedCPublicMethodList;
   
    // m�todos p�blicos get e set para obter e iniciar as vari�veis acima,
    // entre outros m�todos

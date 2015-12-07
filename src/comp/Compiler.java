@@ -370,7 +370,7 @@ public class Compiler {
 			signalError.show("Cannot declare a method to be both 'final' and 'static'. Static methods can never be overriden.");
 		
 		
-		Method newMethod = new Method(name, type, isMethodFinal, isMethodStatic);
+		Method newMethod = new Method(name, type, isMethodFinal, isMethodStatic, currentClass);
 		currentMethod = newMethod;
 		
 		// adiciona lista de parâmetros ao método
@@ -409,7 +409,7 @@ public class Compiler {
 		// checa semântica do método Program.run()
 		if(currentClass.getName().equals("Program") && currentMethod.getName().equals("run"))
 		{
-			if(!isMethodConvRtoL(new Method("targetRun", Type.voidType, false, false), currentMethod, true))
+			if(!isMethodConvRtoL(new Method("targetRun", Type.voidType, false, false, null), currentMethod, true))
 				signalError.show("Program.run() must return type 'void' and cannot take parameters.");
 			if(qualifier != Symbol.PUBLIC)
 				signalError.show("Program.run() must be public.");
@@ -1715,7 +1715,7 @@ public class Compiler {
 	private void assertCompatibleParameters(Method m, ExprList e)
 	{
 		// checa se parâmetros passados são compatíveis
-		Method dummyMethod = new Method("dummy", m.getType(), false, false);
+		Method dummyMethod = new Method("dummy", m.getType(), false, false, null);
 		
 		int i = 0;
 		Iterator<Expr> it2 = e.elements();

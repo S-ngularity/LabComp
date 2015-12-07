@@ -18,6 +18,12 @@ public class StaticInstVarAccessExpr extends Expr
 	{
 		pw.print(cClass.getName()+"."+staticVar.getName());
 	}
+	
+	@Override
+	public void genC(PW pw, boolean putParenthesis)
+	{
+		pw.print("_static_"+ cClass.getName() + "_" + staticVar.getName());
+	}
 
 	@Override
 	public Type getType()

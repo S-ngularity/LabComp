@@ -23,6 +23,18 @@ public class IdExpr extends Expr
 		if ( putParenthesis )
 			pw.print(")");
 	}
+	
+	@Override
+	public void genC(PW pw, boolean putParenthesis)
+	{
+		if ( putParenthesis )
+			pw.print("(");
+		
+		pw.print(v.getCname());
+		
+		if ( putParenthesis )
+			pw.print(")");
+	}
 
 	@Override
 	public Type getType()

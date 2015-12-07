@@ -15,6 +15,10 @@ public class ExprList {
     public void addElement( Expr expr ) {
         exprList.add(expr);
     }
+	
+	public int getSize() {
+        return exprList.size();
+    }
 
     public void genKra( PW pw ) {
 

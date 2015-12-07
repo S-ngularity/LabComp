@@ -36,7 +36,7 @@ public class WhileStmt extends Statement{
 		pw.printlnIdent("{");
 		pw.add();
 		
-		stmt.genKra(pw);
+		stmt.genC(pw);
 		
 		pw.sub();
 		pw.println("");

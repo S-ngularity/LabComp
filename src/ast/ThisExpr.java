@@ -17,6 +17,12 @@ public class ThisExpr extends Expr
 	{
 		pw.print("this");
 	}
+	
+	@Override
+	public void genC(PW pw, boolean putParenthesis)
+	{
+		pw.print("this");
+	}
 
 	@Override
 	public Type getType()

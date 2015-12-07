@@ -34,6 +34,26 @@ public class MethodList {
 		
 		return null;
 	}
+	
+	public int getMethodIndex(String methodName)
+	{
+		int i = 0;
+		
+		for(Method m : methodList)
+		{
+			if(m.getName().equals(methodName))
+				return i;
+			
+			i++;
+		}
+		
+		return -1;
+	}
+	
+	public void set(int index, Method m)
+	{
+		methodList.set(index, m);
+	}
 
     private ArrayList<Method> methodList;
 

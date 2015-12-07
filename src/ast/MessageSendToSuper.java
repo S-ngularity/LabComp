@@ -4,6 +4,8 @@
 */
 package ast;
 
+import java.util.Iterator;
+
 public class MessageSendToSuper extends MessageSend { 
 	
 	public MessageSendToSuper(KraClass actualSuperclass, Method message, ExprList params)
@@ -24,5 +26,17 @@ public class MessageSendToSuper extends MessageSend {
 		super.genKra(pw, false);
     }
     
+	@Override
+    public void genC( PW pw, boolean putParenthesis )
+	{
+		pw.print(m.getCname() + "((" + m.ownerClass.getCname() + "*) this");
+		
+		if(exprList.getSize() > 0)
+			pw.print(", ");
+		
+		exprList.genC(pw);
+		pw.print(")");
+    }
+	
 	KraClass superclass;
 }

@@ -51,7 +51,7 @@ public class UnaryExpr extends Expr {
 		}
 		
 		pw.print("(");
-		expr.genKra(pw, false);
+		expr.genC(pw, false);
 		pw.print(")");
 	}
 

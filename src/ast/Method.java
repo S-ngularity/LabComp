@@ -8,7 +8,7 @@ import java.util.Iterator;
 
 public class Method {
 
-    public Method( String name, Type type, boolean isMethodFinal, boolean isMethodStatic ) {
+    public Method( String name, Type type, boolean isMethodFinal, boolean isMethodStatic, KraClass owner ) {
         this.name = name;
         this.type = type;
 		
@@ -18,6 +18,8 @@ public class Method {
 		
 		isFinal = isMethodFinal;
 		isStatic = isMethodStatic;
+		
+		ownerClass = owner;
     }
 	
 	public void genKra(PW pw)
@@ -53,6 +55,15 @@ public class Method {
 	}
 
     public String getName() { return name; }
+	
+	public String getCname()
+	{
+		if(isStatic())
+			return "_static"+ ownerClass.getCname() +"_"+getName();
+
+		else
+			return "_" + ownerClass.getName() +"_"+getName();
+	}
 
     public Type getType() {
         return type;
@@ -124,4 +135,6 @@ public class Method {
 	
 	private boolean isFinal;
 	private boolean isStatic;
+	
+	public KraClass ownerClass;
 }

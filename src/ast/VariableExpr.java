@@ -13,6 +13,10 @@ public class VariableExpr extends Expr {
     public void genKra( PW pw, boolean putParenthesis ) {
         pw.print( v.getName() );
     }
+	
+	public void genC( PW pw, boolean putParenthesis ) {
+        pw.print( v.getCname() ); // ?? talvez precise da classe antes? mas whatever, VariableExpr nem é usado?
+    }
     
     public Type getType() {
         return v.getType();
