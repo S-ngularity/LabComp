@@ -46,6 +46,9 @@ public class CompositeExpr extends Expr {
         else
             pw.print(" " + strSymbol + " ");
 		
+		if(right.getType() != left.getType() && left.getType() != Type.nullType)
+			pw.print("(" + left.getType().getCname() + ") ");
+		
         right.genC(pw, true);
 		
         if ( putParenthesis )

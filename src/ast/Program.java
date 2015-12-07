@@ -55,7 +55,14 @@ public class Program {
 		pw.println("");
 		pw.printlnIdent("program = new_Program();");
 		pw.println("");
-		pw.printlnIdent("( ( void (*)(_class_Program *) ) program->vt[0] )(program);"); // Nem sempre o número de run no vetor é 0. Como achar?
+		
+		KraClass programClass = null;
+		
+		for(KraClass c : classList)
+			if(c.getName().equals("Program"))
+				programClass = c;
+		
+		pw.printlnIdent("( ( void (*)(_class_Program *) ) program->vt[" + programClass.getCMethodIndex("run") + "] )(program);"); // Nem sempre o número de run no vetor é 0. Como achar?
 		pw.println("");
 		pw.printlnIdent("return 0;");
 		pw.sub();

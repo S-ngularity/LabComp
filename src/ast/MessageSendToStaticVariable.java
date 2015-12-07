@@ -35,9 +35,27 @@ public class MessageSendToStaticVariable extends MessageSend
 		pw.print(m.getCname() + "(" + "_static_"+ accessedClass.getName() + "_" + accessedStaticVar.getName());
 
 		if(exprList.getSize() > 0)
+		{
 			pw.print(", ");
 
-		exprList.genC(pw);
+			Iterator<Variable> itParams = m.getParamList().elements();
+			Iterator<Expr> itExprs = exprList.elements();
+			while(itParams.hasNext())
+			{
+				Variable v = (Variable) itParams.next();
+				Expr e = (Expr) itExprs.next();
+
+				if(v.getType() != e.getType() && v.getType() != Type.nullType)
+					pw.print("(" + v.getType().getCname() + ") ");
+
+				e.genC(pw, false);
+
+				if(itParams.hasNext())
+					pw.print(", ");
+			}
+		}
+		//exprList.genC(pw);
+		
 		pw.print(")");
     }
 

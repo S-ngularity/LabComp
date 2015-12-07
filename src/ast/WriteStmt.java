@@ -34,18 +34,22 @@ public class WriteStmt extends Statement{
 			{
 				pw.printIdent("printf(\"%d \", ");
 				v.genC(pw, true);
-				pw.println(");");
+				pw.print(");");
+				
+				if(it.hasNext())
+					pw.println("");
 			}
 			
 			else if(v.getType() == Type.stringType)
 			{
 				pw.printIdent("fputs(");
 				v.genC(pw, true);
-				pw.println(", stdout);");
+				pw.print(", stdout);");
+				
+				if(it.hasNext())
+					pw.println("");
 			}
 		}
-		
-		pw.println("");
 	}
 
 }

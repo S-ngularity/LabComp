@@ -317,14 +317,14 @@ public class Compiler {
 		{
 			if(currentClass.searchStaticInstVar(name) != null)
 				signalError.show("Static instance variable '"+name+"' has already been declared.");
-			currentClass.addStaticInstanceVar(new InstanceVariable(name, type));
+			currentClass.addStaticInstanceVar(new InstanceVariable(name, type, true));
 		}
 		
 		else
 		{
 			if(currentClass.searchInstVar(name) != null)
 				signalError.show("Instance variable '"+name+"' has already been declared.");
-			currentClass.addInstanceVar(new InstanceVariable(name, type));
+			currentClass.addInstanceVar(new InstanceVariable(name, type, false));
 		}
 	}
 
@@ -862,7 +862,7 @@ public class Compiler {
 			signalError.show(SignalError.semicolon_expected);
 		lexer.nextToken();
 		
-		return new ReturnStmt(e);
+		return new ReturnStmt(e, currentMethodReturnType);
 	}
 
 	// ReadStat ::= “read” “(” LeftValue { “,” LeftValue } “)”

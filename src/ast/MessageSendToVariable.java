@@ -40,9 +40,27 @@ public class MessageSendToVariable extends MessageSend {
 			pw.print(m.getCname() + "(" + calledVar.getCname());
 		
 			if(exprList.getSize() > 0)
+			{
 				pw.print(", ");
+			
+				Iterator<Variable> itParams = m.getParamList().elements();
+				Iterator<Expr> itExprs = exprList.elements();
+				while(itParams.hasNext())
+				{
+					Variable v = (Variable) itParams.next();
+					Expr e = (Expr) itExprs.next();
 
-			exprList.genC(pw);
+					if(v.getType() != e.getType() && v.getType() != Type.nullType)
+						pw.print("(" + v.getType().getCname() + ") ");
+					
+					e.genC(pw, false);
+					
+					if(itParams.hasNext())
+						pw.print(", ");
+				}
+			}
+			//exprList.genC(pw);
+			
 			pw.print(")");
 		}
 		
@@ -69,12 +87,33 @@ public class MessageSendToVariable extends MessageSend {
 
 			pw.print(")) " + calledVar.getCname() + "->vt[" + m.ownerClass.getCMethodIndex(m.getName()) + "]) ");
 
-			pw.print("( (" + m.ownerClass.getCname() + ") " + calledVar.getCname());
+			pw.print("( ");
+			if(calledVar.getType() != m.ownerClass)
+				pw.print("(" + m.ownerClass.getCname() + ") ");
+			pw.print(calledVar.getCname());
 			
 			if(exprList.getSize() > 0)
+			{
 				pw.print(", ");
 			
-			exprList.genC(pw);
+				Iterator<Variable> itParams = m.getParamList().elements();
+				Iterator<Expr> itExprs = exprList.elements();
+				while(itParams.hasNext())
+				{
+					Variable v = (Variable) itParams.next();
+					Expr e = (Expr) itExprs.next();
+
+					if(v.getType() != e.getType() && v.getType() != Type.nullType)
+						pw.print("(" + v.getType().getCname() + ") ");
+					
+					e.genC(pw, false);
+					
+					if(itParams.hasNext())
+						pw.print(", ");
+				}
+			}
+			//exprList.genC(pw);
+			
 			pw.print(")");
 		}
     }

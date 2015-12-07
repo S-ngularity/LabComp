@@ -111,17 +111,15 @@ public class KraClass extends Type {
 			}
 		}
 		
-		pw.printlnIdent("typedef");
+		pw.printlnIdent("typedef struct _St_"+ super.getName() +" _class_"+ super.getName() +";");
 		pw.printlnIdent("struct _St_"+ super.getName() +" {");
 		pw.add();
 		pw.printlnIdent("Func *vt;");
 		genCMemberVars(pw);
 		pw.sub();
-		pw.println("");
-		pw.printlnIdent("} _class_"+ super.getName() +";");
+		pw.printlnIdent("};");
 		pw.println("");
 		genCStaticMemberVars(pw);
-		pw.println("");
 		pw.printlnIdent(getCname() + " new_"+ super.getName() + "(void);");
 		pw.println("");
 		
@@ -243,15 +241,10 @@ public class KraClass extends Type {
 			return superclass.orderedCPublicMethodList.getMethodIndex(methodName);
 	}
 	
-	public boolean genCMemberVars(PW pw)
+	public void genCMemberVars(PW pw)
 	{
-		boolean isNotFirst = false;
-
 		if(superclass != null)
-		{
-			if(superclass.genCMemberVars(pw))
-				isNotFirst = true;
-		}
+			superclass.genCMemberVars(pw);
 
 		Iterator<Object> it = orderedMemberList.elements();
 
@@ -263,28 +256,17 @@ public class KraClass extends Type {
 			{
 				InstanceVariable v = (InstanceVariable) o;
 
-				if(searchInstVar(v.getName()) != null)
+				if(v != null && !v.isStatic())
 				{
-					if(isNotFirst)
-					{
-						pw.println(",");
-						pw.printIdent(v.getType().getCname()+" _"+ getName() + "_" + v.getName());
-					}
-
-					else
-					{
-						pw.printIdent(v.getType().getCname()+" _"+ getName() + "_" + v.getName());
-						isNotFirst = true;
-					}
+					pw.printlnIdent(v.getType().getCname()+" _"+ getName() + "_" + v.getName() + ";");
 				}
 			}
 		}
-		
-		return isNotFirst;
 	}
 	
 	public void genCStaticMemberVars(PW pw)
 	{
+		boolean hasPrintedSomething = false;
 		Iterator<Object> it = orderedMemberList.elements();
 		
 		while(it.hasNext())
@@ -295,12 +277,16 @@ public class KraClass extends Type {
 			{
 				InstanceVariable v = (InstanceVariable) o;
 
-				if(searchStaticInstVar(v.getName()) != null)
+				if(v != null && v.isStatic())
+				{
 					pw.printlnIdent(v.getType().getCname()+" _static_"+ getName() + "_" + v.getName() + ";");
+					hasPrintedSomething = true;
+				}
 			}
 		}
 
-		pw.println("");
+		if(hasPrintedSomething)
+			pw.println("");
 	}
    
    public String getCname() {

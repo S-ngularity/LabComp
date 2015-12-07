@@ -4,6 +4,8 @@
 */
 package ast;
 
+import java.util.Iterator;
+
 public class MessageSendToClass extends MessageSend { 
 	
 	public MessageSendToClass(KraClass targetClass, Method message, ExprList args)
@@ -28,7 +30,27 @@ public class MessageSendToClass extends MessageSend {
     public void genC( PW pw, boolean putParenthesis )
 	{
 		pw.print(m.getCname()+"(");
-		exprList.genC(pw);
+		
+		if(exprList.getSize() > 0)
+		{
+			Iterator<Variable> itParams = m.getParamList().elements();
+			Iterator<Expr> itExprs = exprList.elements();
+			while(itParams.hasNext())
+			{
+				Variable v = (Variable) itParams.next();
+				Expr e = (Expr) itExprs.next();
+
+				if(v.getType() != e.getType() && v.getType() != Type.nullType)
+					pw.print("(" + v.getType().getCname() + ") ");
+
+				e.genC(pw, false);
+
+				if(itParams.hasNext())
+					pw.print(", ");
+			}
+		}
+		//exprList.genC(pw);
+		
 		pw.print(")");
     }
     

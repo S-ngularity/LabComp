@@ -6,9 +6,15 @@ package ast;
 
 public class InstanceVariable extends Variable {
 
-    public InstanceVariable( String name, Type type ) {
+    public InstanceVariable( String name, Type type, boolean isStatic ) {
         super(name, type);
+		this.isStatic = isStatic;
     }
+	
+	public boolean isStatic()
+	{
+		return isStatic;
+	}
 
 	public void genKra(PW pw)
 	{
@@ -19,4 +25,6 @@ public class InstanceVariable extends Variable {
 	{
 		//pw.println(super.getType().getCname()+" _"+ /* nome da classe */ +"+super.getName()+";");
 	}
+	
+	boolean isStatic;
 }

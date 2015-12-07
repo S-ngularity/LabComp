@@ -4,20 +4,15 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/MessageSendToClass.java</file>
-            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/UnaryExpr.java</file>
             <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/MessageSendToVariable.java</file>
-            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/MessageSend.java</file>
-            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/VariableExpr.java</file>
-            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/MessageSendToStaticVariable.java</file>
-            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/Method.java</file>
-            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/Program.java</file>
+            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/LiteralString.java</file>
             <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/MessageSendToSelf.java</file>
             <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/MessageSendToSelfVariable.java</file>
             <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/comp/Compiler.java</file>
-            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/comp/Comp.java</file>
             <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/CompositeExpr.java</file>
-            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/MethodList.java</file>
-            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/Variable.java</file>
+            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/MessageSendToStaticVariable.java</file>
+            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/MessageSendToSuper.java</file>
+            <file>file:/Z:/Desktop/Projetos/GitHub/LabComp/src/ast/KraClass.java</file>
         </group>
     </open-files>
 </project-private>
