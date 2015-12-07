@@ -52,8 +52,9 @@ public class ReadStmt extends Statement{
 				pw.add();
 				pw.printlnIdent("char __s[512];");
 				pw.printlnIdent("gets(__s);");
+				pw.printIdent("");
 				v.genC(pw, true);
-				pw.printIdent(" = malloc(strlen(__s) + 1);");
+				pw.println(" = malloc(strlen(__s) + 1);");
 				pw.printlnIdent("strcpy(");
 				v.genC(pw, true);
 				pw.println(", __s);");

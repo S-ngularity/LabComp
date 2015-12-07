@@ -42,9 +42,17 @@ public class WriteStmt extends Statement{
 			
 			else if(v.getType() == Type.stringType)
 			{
+				// IMPLEMENTAÇÃO CERTA DE ACORDO COM ESPECIFICAÇÃO DO KRAKATOA, COM WRITE NÃO PULANDO LINHA
+				/*
 				pw.printIdent("fputs(");
 				v.genC(pw, true);
 				pw.print(", stdout);");
+				*/
+				
+				// implementação de acordo com o PDF de geração de código C
+				pw.printIdent("puts(");
+				v.genC(pw, true);
+				pw.print(");");
 				
 				if(it.hasNext())
 					pw.println("");
