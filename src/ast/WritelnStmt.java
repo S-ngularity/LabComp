@@ -32,7 +32,7 @@ public class WritelnStmt extends Statement{
 			
 			if(v.getType() == Type.intType)
 			{
-				pw.printIdent("printf(\"%d\n\", ");
+				pw.printIdent("printf(\"%d\\n\", ");
 				v.genC(pw, true);
 				pw.print(");");
 				
